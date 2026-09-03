@@ -2,38 +2,123 @@ package com.vallistruqui.brainrotshield;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.TimePickerDialog;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Insets;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.WindowInsets;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.NumberPicker;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
 public final class MainActivity extends Activity {
+    private static final long STATUS_REFRESH_MS = 30_000L;
+
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final Runnable refreshRunnable = new Runnable() {
+        @Override
+        public void run() {
+            refreshStatus();
+            mainHandler.postDelayed(this, STATUS_REFRESH_MS);
+        }
+    };
+
+    private ShieldPreferences preferences;
+    private UsageStatsTracker usageStatsTracker;
     private TextView accessibilityStatus;
-    private TextView youtubeStatus;
-    private Button youtubeButton;
+    private TextView usageAccessStatus;
+    private TextView installedAppsStatus;
+    private TextView dailyLimitValue;
+    private TextView activeRulesSummary;
+    private LinearLayout timeWindowsContainer;
+    private Switch youtubeSwitch;
+    private Switch instagramSwitch;
+    private Switch tiktokSwitch;
+    private Switch shortsSwitch;
+    private Switch dailyLimitSwitch;
+    private Switch scheduleSwitch;
+    private Button addTimeWindowButton;
+    private Button pauseShortsButton;
+    private Button pauseLimitButton;
+    private Button pauseScheduleButton;
+    private boolean rendering;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        preferences = new ShieldPreferences(this);
+        usageStatsTracker = new UsageStatsTracker(this);
+
         accessibilityStatus = findViewById(R.id.accessibility_status);
-        youtubeStatus = findViewById(R.id.youtube_status);
-        youtubeButton = findViewById(R.id.open_youtube_button);
+        usageAccessStatus = findViewById(R.id.usage_access_status);
+        installedAppsStatus = findViewById(R.id.installed_apps_status);
+        dailyLimitValue = findViewById(R.id.daily_limit_value);
+        activeRulesSummary = findViewById(R.id.active_rules_summary);
+        timeWindowsContainer = findViewById(R.id.time_windows_container);
+        youtubeSwitch = findViewById(R.id.youtube_switch);
+        instagramSwitch = findViewById(R.id.instagram_switch);
+        tiktokSwitch = findViewById(R.id.tiktok_switch);
+        shortsSwitch = findViewById(R.id.shorts_switch);
+        dailyLimitSwitch = findViewById(R.id.daily_limit_switch);
+        scheduleSwitch = findViewById(R.id.schedule_switch);
+        addTimeWindowButton = findViewById(R.id.add_time_window_button);
 
         findViewById(R.id.accessibility_settings_button).setOnClickListener(
                 ignored -> showAccessibilityDisclosure());
-        youtubeButton.setOnClickListener(ignored -> openYoutube());
+        findViewById(R.id.usage_access_button).setOnClickListener(
+                ignored -> showUsageAccessDisclosure());
+        findViewById(R.id.open_test_app_button).setOnClickListener(
+                ignored -> showAppLauncher());
+        findViewById(R.id.change_daily_limit_button).setOnClickListener(
+                ignored -> showDailyLimitDialog());
+        addTimeWindowButton.setOnClickListener(ignored -> addTimeWindow());
+        pauseShortsButton = findViewById(R.id.pause_shorts_button);
+        pauseLimitButton = findViewById(R.id.pause_limit_button);
+        pauseScheduleButton = findViewById(R.id.pause_schedule_button);
+        pauseShortsButton.setOnClickListener(
+                ignored -> showPauseDialog(RestrictionType.SHORT_FORM));
+        pauseLimitButton.setOnClickListener(
+                ignored -> showPauseDialog(RestrictionType.DAILY_LIMIT));
+        pauseScheduleButton.setOnClickListener(
+                ignored -> showPauseDialog(RestrictionType.FOCUS_SCHEDULE));
 
+        bindSwitches();
         applySystemBarInsets(findViewById(R.id.page_root));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mainHandler.removeCallbacks(refreshRunnable);
+        mainHandler.post(refreshRunnable);
+    }
+
+    @Override
+    protected void onStop() {
+        mainHandler.removeCallbacks(refreshRunnable);
+        super.onStop();
     }
 
     @Override
@@ -42,25 +127,222 @@ public final class MainActivity extends Activity {
         refreshStatus();
     }
 
-    private void refreshStatus() {
-        boolean serviceEnabled = isAccessibilityServiceEnabled();
-        boolean youtubeInstalled = getPackageManager()
-                .getLaunchIntentForPackage(ShortsBlockerAccessibilityService.YOUTUBE_PACKAGE) != null;
-
-        setStatus(accessibilityStatus, serviceEnabled,
-                R.string.status_active, R.string.status_inactive);
-        setStatus(youtubeStatus, youtubeInstalled,
-                R.string.status_installed, R.string.status_not_found);
-
-        youtubeButton.setEnabled(youtubeInstalled);
-        youtubeButton.setAlpha(youtubeInstalled ? 1f : 0.5f);
+    private void bindSwitches() {
+        youtubeSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (!rendering) {
+                preferences.setAppEnabled(ProtectedApp.YOUTUBE, checked);
+                refreshStatus();
+            }
+        });
+        instagramSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (!rendering) {
+                preferences.setAppEnabled(ProtectedApp.INSTAGRAM, checked);
+                refreshStatus();
+            }
+        });
+        tiktokSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (!rendering) {
+                preferences.setAppEnabled(ProtectedApp.TIKTOK, checked);
+                refreshStatus();
+            }
+        });
+        shortsSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (!rendering) {
+                preferences.setShortFormEnabled(checked);
+                if (checked) {
+                    preferences.clearPause(RestrictionType.SHORT_FORM);
+                }
+                refreshStatus();
+            }
+        });
+        dailyLimitSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (!rendering) {
+                preferences.setDailyLimitEnabled(checked);
+                if (checked) {
+                    preferences.clearPause(RestrictionType.DAILY_LIMIT);
+                    if (!usageStatsTracker.hasAccess()) {
+                        showUsageAccessDisclosure();
+                    }
+                }
+                refreshStatus();
+            }
+        });
+        scheduleSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (!rendering) {
+                preferences.setFocusScheduleEnabled(checked);
+                if (checked) {
+                    preferences.clearPause(RestrictionType.FOCUS_SCHEDULE);
+                }
+                refreshStatus();
+            }
+        });
     }
 
-    private void setStatus(TextView view, boolean positive, int positiveText, int negativeText) {
-        view.setText(positive ? positiveText : negativeText);
-        view.setTextColor(getColor(positive ? R.color.status_ok_text : R.color.status_warning_text));
-        view.setBackgroundResource(
-                positive ? R.drawable.status_ok_background : R.drawable.status_warning_background);
+    private void refreshStatus() {
+        if (preferences == null || usageStatsTracker == null) {
+            return;
+        }
+        boolean serviceEnabled = isAccessibilityServiceEnabled();
+        boolean usageAccess = usageStatsTracker.hasAccess();
+        setStatus(accessibilityStatus, serviceEnabled,
+                R.string.status_active, R.string.status_inactive);
+        setStatus(usageAccessStatus, usageAccess,
+                R.string.status_granted, R.string.status_required);
+
+        rendering = true;
+        youtubeSwitch.setChecked(preferences.isAppEnabled(ProtectedApp.YOUTUBE));
+        instagramSwitch.setChecked(preferences.isAppEnabled(ProtectedApp.INSTAGRAM));
+        tiktokSwitch.setChecked(preferences.isAppEnabled(ProtectedApp.TIKTOK));
+        shortsSwitch.setChecked(preferences.isShortFormEnabled());
+        dailyLimitSwitch.setChecked(preferences.isDailyLimitEnabled());
+        scheduleSwitch.setChecked(preferences.isFocusScheduleEnabled());
+        rendering = false;
+
+        setPauseButtonEnabled(pauseShortsButton, preferences.isShortFormEnabled());
+        setPauseButtonEnabled(pauseLimitButton, preferences.isDailyLimitEnabled());
+        setPauseButtonEnabled(pauseScheduleButton, preferences.isFocusScheduleEnabled());
+
+        installedAppsStatus.setText(buildInstalledAppsText());
+        dailyLimitValue.setText(getString(
+                R.string.daily_limit_value,
+                formatMinutes(preferences.getDailyLimitMinutes())));
+        renderTimeWindows();
+        activeRulesSummary.setText(buildActiveRulesSummary(System.currentTimeMillis(), usageAccess));
+    }
+
+    private CharSequence buildInstalledAppsText() {
+        List<String> installed = new ArrayList<>();
+        List<String> missing = new ArrayList<>();
+        for (ProtectedApp app : ProtectedApp.ALL) {
+            if (getPackageManager().getLaunchIntentForPackage(app.packageName()) != null) {
+                installed.add(app.displayName());
+            } else {
+                missing.add(app.displayName());
+            }
+        }
+        if (installed.isEmpty()) {
+            return getString(R.string.no_supported_apps_found);
+        }
+        if (missing.isEmpty()) {
+            return getString(R.string.all_supported_apps_found, joinNames(installed));
+        }
+        return getString(R.string.some_supported_apps_found,
+                joinNames(installed), joinNames(missing));
+    }
+
+    private CharSequence buildActiveRulesSummary(long nowMillis, boolean usageAccess) {
+        List<ProtectedApp> enabledApps = preferences.getEnabledApps();
+        String appNames = enabledApps.isEmpty()
+                ? getString(R.string.none)
+                : joinAppNames(enabledApps);
+        StringBuilder summary = new StringBuilder();
+        summary.append(getString(R.string.summary_apps, appNames));
+
+        summary.append('\n').append(getString(
+                R.string.summary_shorts,
+                describeRule(RestrictionType.SHORT_FORM,
+                        preferences.isShortFormEnabled(), nowMillis)));
+
+        if (!preferences.isDailyLimitEnabled()) {
+            summary.append('\n').append(getString(
+                    R.string.summary_daily_limit, getString(R.string.rule_disabled)));
+        } else if (!usageAccess) {
+            summary.append('\n').append(getString(
+                    R.string.summary_daily_limit, getString(R.string.rule_needs_usage_access)));
+        } else {
+            long usedMillis = usageStatsTracker.getTodayUsageMillis(enabledApps, nowMillis);
+            String state = describeRule(
+                    RestrictionType.DAILY_LIMIT, true, nowMillis)
+                    + " · " + getString(R.string.usage_today,
+                    formatMinutes(usedMillis / 60_000L),
+                    formatMinutes(preferences.getDailyLimitMinutes()));
+            summary.append('\n').append(getString(R.string.summary_daily_limit, state));
+        }
+
+        if (!preferences.isFocusScheduleEnabled()) {
+            summary.append('\n').append(getString(
+                    R.string.summary_schedule, getString(R.string.rule_disabled)));
+        } else if (preferences.isPaused(RestrictionType.FOCUS_SCHEDULE, nowMillis)) {
+            summary.append('\n').append(getString(
+                    R.string.summary_schedule,
+                    describeRule(RestrictionType.FOCUS_SCHEDULE, true, nowMillis)));
+        } else {
+            TimeWindow active = preferences.getActiveTimeWindow(nowMillis);
+            String state = active == null
+                    ? getString(R.string.schedule_waiting)
+                    : getString(R.string.schedule_blocking_now, active.format());
+            summary.append('\n').append(getString(R.string.summary_schedule, state));
+        }
+        return summary;
+    }
+
+    private String describeRule(RestrictionType restriction, boolean enabled, long nowMillis) {
+        if (!enabled) {
+            return getString(R.string.rule_disabled);
+        }
+        if (preferences.isPaused(restriction, nowMillis)) {
+            return getString(R.string.rule_paused_until,
+                    formatTime(preferences.getPauseUntil(restriction)));
+        }
+        return getString(R.string.rule_active);
+    }
+
+    private void renderTimeWindows() {
+        timeWindowsContainer.removeAllViews();
+        List<TimeWindow> windows = preferences.getTimeWindows();
+        if (windows.isEmpty()) {
+            TextView empty = createWindowLabel();
+            empty.setText(R.string.no_time_windows);
+            empty.setTextColor(getColor(R.color.muted));
+            timeWindowsContainer.addView(empty);
+        } else {
+            for (int index = 0; index < windows.size(); index++) {
+                timeWindowsContainer.addView(createTimeWindowRow(windows.get(index), index));
+            }
+        }
+        boolean canAdd = windows.size() < ShieldPreferences.MAX_TIME_WINDOWS;
+        addTimeWindowButton.setEnabled(canAdd);
+        addTimeWindowButton.setAlpha(canAdd ? 1f : 0.5f);
+    }
+
+    private View createTimeWindowRow(TimeWindow window, int index) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(0, dp(4), 0, dp(4));
+
+        TextView label = createWindowLabel();
+        label.setText(getString(R.string.time_window_item, window.format()));
+        label.setContentDescription(getString(R.string.edit_time_window_description, window.format()));
+        label.setGravity(Gravity.CENTER_VERTICAL);
+        label.setMinHeight(dp(48));
+        label.setPadding(dp(12), 0, dp(12), 0);
+        int selectableBackground = resolveSelectableBackground();
+        if (selectableBackground != 0) {
+            label.setBackgroundResource(selectableBackground);
+        }
+        label.setOnClickListener(ignored -> editTimeWindow(index, window));
+        row.addView(label, new LinearLayout.LayoutParams(
+                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+
+        Button remove = new Button(this, null, android.R.attr.buttonStyleSmall);
+        remove.setText(R.string.remove);
+        remove.setAllCaps(false);
+        remove.setMinHeight(dp(48));
+        remove.setContentDescription(getString(R.string.remove_time_window_description,
+                window.format()));
+        remove.setOnClickListener(ignored -> confirmRemoveTimeWindow(index, window));
+        row.addView(remove, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        return row;
+    }
+
+    private TextView createWindowLabel() {
+        TextView label = new TextView(this);
+        label.setTextColor(getColor(R.color.ink));
+        label.setTextSize(15f);
+        return label;
     }
 
     private void showAccessibilityDisclosure() {
@@ -74,14 +356,243 @@ public final class MainActivity extends Activity {
                 .show();
     }
 
-    private void openYoutube() {
-        Intent launchIntent = getPackageManager()
-                .getLaunchIntentForPackage(ShortsBlockerAccessibilityService.YOUTUBE_PACKAGE);
+    private void showUsageAccessDisclosure() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.usage_disclosure_title)
+                .setMessage(R.string.usage_disclosure_body)
+                .setNegativeButton(R.string.not_now, null)
+                .setPositiveButton(R.string.accept_and_continue,
+                        (dialog, which) -> {
+                            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+                            intent.setData(Uri.parse("package:" + getPackageName()));
+                            try {
+                                startActivity(intent);
+                            } catch (RuntimeException exception) {
+                                startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+                            }
+                        })
+                .show();
+    }
+
+    private void showAppLauncher() {
+        List<ProtectedApp> installed = new ArrayList<>();
+        for (ProtectedApp app : ProtectedApp.ALL) {
+            if (getPackageManager().getLaunchIntentForPackage(app.packageName()) != null) {
+                installed.add(app);
+            }
+        }
+        if (installed.isEmpty()) {
+            Toast.makeText(this, R.string.no_supported_apps_found, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        CharSequence[] names = new CharSequence[installed.size()];
+        for (int index = 0; index < installed.size(); index++) {
+            names[index] = installed.get(index).displayName();
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.choose_app_to_open)
+                .setItems(names, (dialog, index) -> openApp(installed.get(index)))
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private void openApp(ProtectedApp app) {
+        Intent launchIntent = getPackageManager().getLaunchIntentForPackage(app.packageName());
         if (launchIntent == null) {
-            Toast.makeText(this, R.string.youtube_not_installed, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,
+                    getString(R.string.app_not_installed, app.displayName()),
+                    Toast.LENGTH_SHORT).show();
             return;
         }
         startActivity(launchIntent);
+    }
+
+    private void showDailyLimitDialog() {
+        int currentMinutes = preferences.getDailyLimitMinutes();
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.HORIZONTAL);
+        content.setGravity(Gravity.CENTER);
+        content.setPadding(dp(24), dp(8), dp(24), dp(8));
+
+        NumberPicker hours = new NumberPicker(this);
+        hours.setMinValue(0);
+        hours.setMaxValue(12);
+        hours.setWrapSelectorWheel(false);
+        hours.setValue(currentMinutes / 60);
+        hours.setContentDescription(getString(R.string.hours));
+        content.addView(hours);
+
+        NumberPicker quarterHours = new NumberPicker(this);
+        quarterHours.setMinValue(0);
+        quarterHours.setMaxValue(3);
+        quarterHours.setDisplayedValues(new String[]{"00 min", "15 min", "30 min", "45 min"});
+        quarterHours.setWrapSelectorWheel(false);
+        quarterHours.setValue((currentMinutes % 60) / 15);
+        quarterHours.setContentDescription(getString(R.string.minutes));
+        hours.setOnValueChangedListener((picker, oldValue, newValue) -> {
+            if (newValue == 12) {
+                quarterHours.setValue(0);
+            }
+        });
+        quarterHours.setOnValueChangedListener((picker, oldValue, newValue) -> {
+            if (newValue > 0 && hours.getValue() == 12) {
+                hours.setValue(11);
+            }
+        });
+        LinearLayout.LayoutParams minuteParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        minuteParams.leftMargin = dp(16);
+        content.addView(quarterHours, minuteParams);
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.choose_daily_limit)
+                .setMessage(R.string.daily_limit_dialog_body)
+                .setView(content)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.save, (dialog, which) -> {
+                    int selected = hours.getValue() * 60 + quarterHours.getValue() * 15;
+                    if (selected == 0) {
+                        selected = ShieldPreferences.MIN_DAILY_LIMIT_MINUTES;
+                    }
+                    preferences.setDailyLimitMinutes(selected);
+                    refreshStatus();
+                })
+                .show();
+    }
+
+    private void addTimeWindow() {
+        List<TimeWindow> windows = preferences.getTimeWindows();
+        if (windows.size() >= ShieldPreferences.MAX_TIME_WINDOWS) {
+            Toast.makeText(this, R.string.time_window_limit_reached, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Calendar now = Calendar.getInstance();
+        int start = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE);
+        showTimeWindowPickers(-1, new TimeWindow(start, (start + 60) % TimeWindow.MINUTES_PER_DAY));
+    }
+
+    private void editTimeWindow(int index, TimeWindow window) {
+        showTimeWindowPickers(index, window);
+    }
+
+    private void showTimeWindowPickers(int index, TimeWindow initial) {
+        TimePickerDialog startDialog = new TimePickerDialog(
+                this,
+                (view, startHour, startMinute) -> {
+                    int selectedStart = startHour * 60 + startMinute;
+                    TimePickerDialog endDialog = new TimePickerDialog(
+                            this,
+                            (endView, endHour, endMinute) -> saveTimeWindow(
+                                    index,
+                                    new TimeWindow(selectedStart, endHour * 60 + endMinute)),
+                            initial.endMinute() / 60,
+                            initial.endMinute() % 60,
+                            true);
+                    endDialog.setTitle(R.string.choose_end_time);
+                    endDialog.show();
+                },
+                initial.startMinute() / 60,
+                initial.startMinute() % 60,
+                true);
+        startDialog.setTitle(R.string.choose_start_time);
+        startDialog.show();
+    }
+
+    private void saveTimeWindow(int index, TimeWindow window) {
+        List<TimeWindow> windows = new ArrayList<>(preferences.getTimeWindows());
+        if (index >= 0 && index < windows.size()) {
+            windows.set(index, window);
+        } else if (windows.size() < ShieldPreferences.MAX_TIME_WINDOWS) {
+            windows.add(window);
+        }
+        preferences.setTimeWindows(windows);
+        refreshStatus();
+    }
+
+    private void confirmRemoveTimeWindow(int index, TimeWindow window) {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.remove_time_window_title)
+                .setMessage(getString(R.string.remove_time_window_body, window.format()))
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.remove, (dialog, which) -> {
+                    List<TimeWindow> windows = new ArrayList<>(preferences.getTimeWindows());
+                    if (index >= 0 && index < windows.size()) {
+                        windows.remove(index);
+                        preferences.setTimeWindows(windows);
+                        refreshStatus();
+                    }
+                })
+                .show();
+    }
+
+    private void showPauseDialog(RestrictionType restriction) {
+        CharSequence[] choices = getResources().getTextArray(R.array.pause_durations);
+        new AlertDialog.Builder(this)
+                .setTitle(pauseDialogTitle(restriction))
+                .setItems(choices, (dialog, index) -> {
+                    long now = System.currentTimeMillis();
+                    switch (index) {
+                        case 0:
+                            preferences.clearPause(restriction);
+                            break;
+                        case 1:
+                            preferences.pause(restriction, now + 15L * 60L * 1_000L);
+                            break;
+                        case 2:
+                            preferences.pause(restriction, now + 30L * 60L * 1_000L);
+                            break;
+                        case 3:
+                            preferences.pause(restriction, now + 60L * 60L * 1_000L);
+                            break;
+                        case 4:
+                            preferences.pause(restriction, now + 2L * 60L * 60L * 1_000L);
+                            break;
+                        case 5:
+                            preferences.pause(restriction, startOfTomorrow());
+                            break;
+                        default:
+                            return;
+                    }
+                    refreshStatus();
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private int pauseDialogTitle(RestrictionType restriction) {
+        switch (restriction) {
+            case SHORT_FORM:
+                return R.string.pause_shorts_title;
+            case DAILY_LIMIT:
+                return R.string.pause_limit_title;
+            case FOCUS_SCHEDULE:
+                return R.string.pause_schedule_title;
+            default:
+                throw new IllegalArgumentException("Unsupported restriction " + restriction);
+        }
+    }
+
+    private long startOfTomorrow() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTimeInMillis();
+    }
+
+    private void setStatus(TextView view, boolean positive, int positiveText, int negativeText) {
+        view.setText(positive ? positiveText : negativeText);
+        view.setTextColor(getColor(positive ? R.color.status_ok_text : R.color.status_warning_text));
+        view.setBackgroundResource(
+                positive ? R.drawable.status_ok_background : R.drawable.status_warning_background);
+    }
+
+    private static void setPauseButtonEnabled(Button button, boolean enabled) {
+        button.setEnabled(enabled);
+        button.setAlpha(enabled ? 1f : 0.45f);
     }
 
     private boolean isAccessibilityServiceEnabled() {
@@ -102,6 +613,46 @@ public final class MainActivity extends Activity {
             }
         }
         return false;
+    }
+
+    private String joinAppNames(List<ProtectedApp> apps) {
+        List<String> names = new ArrayList<>();
+        for (ProtectedApp app : apps) {
+            names.add(app.displayName());
+        }
+        return joinNames(names);
+    }
+
+    private static String joinNames(List<String> names) {
+        return TextUtils.join(", ", names);
+    }
+
+    private static String formatMinutes(long totalMinutes) {
+        long safeMinutes = Math.max(0L, totalMinutes);
+        long hours = safeMinutes / 60L;
+        long minutes = safeMinutes % 60L;
+        if (hours == 0L) {
+            return minutes + " min";
+        }
+        if (minutes == 0L) {
+            return hours + " h";
+        }
+        return hours + " h " + minutes + " min";
+    }
+
+    private String formatTime(long timestampMillis) {
+        return DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault())
+                .format(new Date(timestampMillis));
+    }
+
+    private int resolveSelectableBackground() {
+        TypedValue value = new TypedValue();
+        getTheme().resolveAttribute(android.R.attr.selectableItemBackground, value, true);
+        return value.resourceId;
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     @SuppressWarnings("deprecation")

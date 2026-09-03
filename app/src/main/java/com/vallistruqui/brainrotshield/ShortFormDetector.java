@@ -5,15 +5,15 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-final class YouTubeShortsDetector {
+final class ShortFormDetector {
     private static final int MAX_NODES = 1_200;
 
-    private YouTubeShortsDetector() {
+    private ShortFormDetector() {
     }
 
     @SuppressWarnings("deprecation")
-    static ShortsSignals inspect(AccessibilityNodeInfo root) {
-        ShortsSignals signals = new ShortsSignals();
+    static ShortFormSignals inspect(ProtectedApp app, AccessibilityNodeInfo root) {
+        ShortFormSignals signals = new ShortFormSignals(app);
         if (root == null) {
             return signals;
         }
@@ -33,6 +33,7 @@ final class YouTubeShortsDetector {
                             node.getText(),
                             node.getContentDescription(),
                             node.getViewIdResourceName(),
+                            node.getClassName(),
                             node.isSelected());
                 }
 

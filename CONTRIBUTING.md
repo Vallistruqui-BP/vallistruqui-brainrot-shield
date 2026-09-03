@@ -27,10 +27,12 @@ Before submitting a pull request, make sure tests and Android lint pass. Add foc
 ## Safety and privacy requirements
 
 - Keep accessibility access scoped to the packages the feature explicitly supports.
+- Keep Usage Access processing transient and limited to foreground detection plus aggregate time calculations for supported apps.
 - Do not add analytics, advertising, screenshots, key logging, hidden persistence, or collection of accessibility content.
 - Do not intercept or obstruct Android's uninstall or security interfaces through accessibility automation.
 - Treat Personal and Managed modes as different security models. Only legitimate Android Device Owner or Profile Owner enrollment may claim managed uninstall restrictions.
 - Restore media volume after every blocking attempt and service shutdown.
+- Add regression fixtures for ordinary screens whenever changing a short-form detector; a navigation label by itself is not enough evidence.
 - Never commit APKs, signing keys, keystores, service-account credentials, tokens, `local.properties`, or generated build directories.
 
 ## Pull requests

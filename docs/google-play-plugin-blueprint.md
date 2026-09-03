@@ -28,6 +28,7 @@ Canonical lifecycle: [google-play-release-cycle.md](google-play-release-cycle.md
 - Inspect manifests and merged manifests.
 - Detect sensitive permissions and required Play declarations.
 - Verify prominent disclosure resources exist for AccessibilityService usage.
+- Verify a separate prominent disclosure exists before opening Usage Access settings when `PACKAGE_USAGE_STATS` is declared.
 - Inspect an AAB/APK package, version, signature certificate, and SHA-256.
 - Check for accidentally tracked keystores, credentials, service-account files, or secret-bearing properties.
 - Compare local `versionCode` with the latest uploaded Play bundle.
@@ -120,11 +121,13 @@ The first project profile should encode these checks:
 - Expected package: `com.vallistruqui.brainrotshield`.
 - Target SDK must satisfy the current Play requirement; API 36 as of 2026-09-03.
 - Accessibility service must remain limited to explicitly supported social-app packages.
+- Usage Access must remain optional, locally processed, and limited to aggregate supported-app timing plus foreground enforcement.
 - The app must provide prominent disclosure and affirmative consent before opening Accessibility settings.
 - The Play listing must disclose AccessibilityService use.
 - The app must not declare itself an accessibility tool unless its primary purpose changes and legitimately qualifies.
 - Rule-based detection may issue Back; open-ended autonomous behavior is out of scope.
 - No viewing history, accessibility text, screenshots, or private social content may be uploaded.
+- No detailed history of unrelated app usage may be retained or transmitted.
 - Any guardian networking requires a new Data safety review.
 - Any uninstall blocking requires a separately reviewed parental-control or enterprise-managed product mode.
 

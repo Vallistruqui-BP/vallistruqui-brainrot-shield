@@ -2,8 +2,8 @@
 
 ## Purpose
 
-- Maintain Vallistruqui Brainrot Shield, a local Android accessibility-service MVP that exits short-form feeds.
-- Keep the service limited to the official YouTube package unless the user explicitly expands scope.
+- Maintain Vallistruqui Brainrot Shield, a local Android accessibility and digital-wellbeing app that exits short-form feeds and enforces user-selected time rules.
+- Keep the service limited to the official YouTube, Instagram, and TikTok packages unless the user explicitly expands scope.
 
 ## Stack
 
@@ -20,15 +20,19 @@
 
 ## Safety and privacy
 
-- The accessibility service must remain package-scoped to com.google.android.youtube.
-- Do not add networking, analytics, screen capture, or persistence of accessibility content without explicit user approval.
+- The accessibility service must remain package-scoped to the official YouTube, Instagram, and TikTok packages.
+- Usage Access must be optional, disclosed separately, and limited to local foreground detection plus aggregate supported-app time.
+- Do not add networking, analytics, screen capture, detailed usage history, or persistence of accessibility content without explicit user approval.
 - Keep the accessibility overlay short-lived, non-focusable, and non-touchable so it cannot trap input.
 - Do not reintroduce the system overlay permission while TYPE_ACCESSIBILITY_OVERLAY can provide the protection screen.
 - Restore media volume after every blocking action and during service teardown.
+- Keep short-form, daily-limit, and focus-window rules independently configurable and pausable.
 - Keep Gradle build intermediates outside the Google Drive-synchronized workspace; desktop.ini breaks AAPT generated resources.
 
 ## Review focus
 
-- Prevent false positives on ordinary YouTube Home and long-form video screens.
+- Prevent false positives on ordinary YouTube/Instagram screens and long-form YouTube video controls.
+- Treat a Shorts/Reels navigation label plus generic post controls as insufficient evidence on YouTube and Instagram.
+- Verify light and dark palettes, large text, 48dp touch targets, overnight windows, pause expiry, and missing Usage Access states.
 - Verify service configuration, prominent disclosure, accessibility-overlay behavior, cooldown behavior, and volume restoration.
 - Update README.md when setup steps, supported apps, or permissions change.

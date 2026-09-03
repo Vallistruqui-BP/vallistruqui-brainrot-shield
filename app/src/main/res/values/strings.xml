@@ -2,28 +2,114 @@
 <resources>
     <string name="app_name">Brainrot Shield</string>
     <string name="hero_eyebrow">CONTROL DE ATENCIÓN</string>
-    <string name="hero_title">YouTube sin Shorts.</string>
-    <string name="hero_body">Cuando detecta el feed de Shorts, la app silencia el audio, cubre la pantalla y vuelve atrás automáticamente.</string>
-    <string name="setup_title">Configuración</string>
-    <string name="setup_body">Activá el servicio una sola vez. La protección visual está incluida y no necesita permiso para aparecer sobre otras apps.</string>
+    <string name="hero_title">Tu tiempo, tus reglas.</string>
+    <string name="hero_body">Bloqueá videos cortos, fijá un límite diario y reservá ventanas de enfoque en YouTube, Instagram y TikTok.</string>
+
+    <string name="current_state_title">Protección actual</string>
+    <string name="current_state_body">Este resumen muestra qué reglas se aplicarían ahora mismo.</string>
+    <string name="summary_apps">Apps: %1$s</string>
+    <string name="summary_shorts">Videos cortos: %1$s</string>
+    <string name="summary_daily_limit">Límite diario: %1$s</string>
+    <string name="summary_schedule">Horarios: %1$s</string>
+    <string name="rule_active">Activo</string>
+    <string name="rule_disabled">Desactivado</string>
+    <string name="rule_needs_usage_access">Falta acceso de uso</string>
+    <string name="rule_paused_until">Pausado hasta %1$s</string>
+    <string name="schedule_waiting">En espera · fuera de las ventanas configuradas</string>
+    <string name="schedule_blocking_now">Bloqueando ahora · %1$s</string>
+    <string name="usage_today">%1$s usados de %2$s</string>
+    <string name="none">Ninguna</string>
+
+    <string name="permissions_title">Permisos necesarios</string>
+    <string name="permissions_body">Cada acceso se explica antes de abrir Ajustes. Podés usar el bloqueo de videos cortos sin activar el límite diario.</string>
     <string name="accessibility_title">Servicio de accesibilidad</string>
-    <string name="accessibility_body">Permite leer la estructura visible de YouTube, reconocer el feed de Shorts y ejecutar Atrás automáticamente.</string>
-    <string name="youtube_title">YouTube oficial</string>
-    <string name="youtube_body">La primera versión está limitada a com.google.android.youtube.</string>
-    <string name="enable_accessibility">Activar servicio de accesibilidad</string>
-    <string name="open_youtube">Abrir YouTube para probar</string>
+    <string name="accessibility_body">Detecta feeds de videos cortos en las apps seleccionadas y ejecuta Atrás o Inicio cuando una regla bloquea contenido.</string>
+    <string name="usage_access_title">Acceso a datos de uso</string>
+    <string name="usage_access_body">Permite sumar el tiempo diario de las apps seleccionadas y aplicar el límite incluso si un video no genera nuevos eventos.</string>
+    <string name="enable_accessibility">Configurar accesibilidad</string>
+    <string name="enable_usage_access">Configurar acceso de uso</string>
     <string name="status_active">Activo</string>
     <string name="status_inactive">Inactivo</string>
-    <string name="status_installed">Instalado</string>
-    <string name="status_not_found">No encontrado</string>
+    <string name="status_granted">Concedido</string>
+    <string name="status_required">Necesario</string>
+
+    <string name="apps_title">Apps protegidas</string>
+    <string name="apps_body">Las reglas activas se aplican solamente a las apps seleccionadas. TikTok se detecta por su paquete oficial de Google Play.</string>
+    <string name="youtube_app">YouTube</string>
+    <string name="instagram_app">Instagram</string>
+    <string name="tiktok_app">TikTok</string>
+    <string name="open_app_to_test">Abrir una app para probar</string>
+    <string name="choose_app_to_open">Elegí una app</string>
+    <string name="no_supported_apps_found">No se encontró ninguna app compatible instalada.</string>
+    <string name="all_supported_apps_found">Instaladas: %1$s.</string>
+    <string name="some_supported_apps_found">Instaladas: %1$s. No encontradas: %2$s.</string>
+    <string name="app_not_installed">No se encontró %1$s.</string>
+
+    <string name="restrictions_title">Restricciones</string>
+    <string name="restrictions_body">Cada regla se activa y se pausa por separado. Las pausas terminan automáticamente.</string>
+    <string name="shorts_rule_title">Bloquear videos cortos</string>
+    <string name="shorts_rule_body">Sale de Shorts, Reels y feeds verticales de TikTok sin bloquear las secciones normales de YouTube o Instagram.</string>
+    <string name="daily_limit_rule_title">Límite diario combinado</string>
+    <string name="daily_limit_rule_body">Suma el tiempo de todas las apps seleccionadas. Al agotarse, muestra un aviso grande y vuelve al Inicio.</string>
+    <string name="daily_limit_value">Límite configurado: %1$s</string>
+    <string name="daily_limit_value_default">Límite configurado</string>
+    <string name="change_daily_limit">Cambiar límite diario</string>
+    <string name="choose_daily_limit">Elegí el límite diario</string>
+    <string name="daily_limit_dialog_body">El tiempo se comparte entre YouTube, Instagram y TikTok según cuáles estén seleccionadas. Mínimo: 15 minutos.</string>
+    <string name="hours">Horas</string>
+    <string name="minutes">Minutos</string>
+
+    <string name="schedule_rule_title">Ventanas de enfoque</string>
+    <string name="schedule_rule_body">Durante estas franjas se bloquea por completo el acceso a las apps seleccionadas. Las ventanas que cruzan medianoche también funcionan.</string>
+    <string name="time_windows_help">Tocá una franja para editarla. Si inicio y fin coinciden, se considera todo el día.</string>
+    <string name="add_time_window">Agregar ventana horaria</string>
+    <string name="no_time_windows">No hay ventanas configuradas.</string>
+    <string name="time_window_item">%1$s</string>
+    <string name="edit_time_window_description">Editar ventana %1$s</string>
+    <string name="remove_time_window_description">Quitar ventana %1$s</string>
+    <string name="time_window_limit_reached">Podés configurar hasta cinco ventanas.</string>
+    <string name="choose_start_time">Hora de inicio</string>
+    <string name="choose_end_time">Hora de finalización</string>
+    <string name="remove_time_window_title">Quitar ventana</string>
+    <string name="remove_time_window_body">¿Querés quitar la ventana %1$s?</string>
+
+    <string name="temporary_pauses_title">Pausas temporales</string>
+    <string name="temporary_pauses_body">Levantá una sola regla sin modificar las demás. “Reanudar ahora” cancela una pausa vigente.</string>
+    <string name="pause_shorts">Pausar o reanudar videos cortos</string>
+    <string name="pause_limit">Pausar o reanudar límite diario</string>
+    <string name="pause_schedule">Pausar o reanudar horarios</string>
+    <string name="pause_shorts_title">Pausa de videos cortos</string>
+    <string name="pause_limit_title">Pausa del límite diario</string>
+    <string name="pause_schedule_title">Pausa de ventanas de enfoque</string>
+    <string-array name="pause_durations">
+        <item>Reanudar ahora</item>
+        <item>Pausar 15 minutos</item>
+        <item>Pausar 30 minutos</item>
+        <item>Pausar 1 hora</item>
+        <item>Pausar 2 horas</item>
+        <item>Pausar hasta mañana</item>
+    </string-array>
+
     <string name="privacy_title">Privacidad por diseño</string>
-    <string name="privacy_body">Sin internet, sin cuentas, sin capturas y sin historial. El servicio recibe eventos solamente de YouTube y procesa la interfaz visible en el dispositivo.</string>
-    <string name="limitation">MVP local · YouTube puede cambiar sus etiquetas internas y requerir recalibración.</string>
-    <string name="overlay_message">Shorts bloqueados</string>
-    <string name="youtube_not_installed">No se encontró la app oficial de YouTube.</string>
-    <string name="accessibility_service_description">Lee la estructura visible de YouTube para detectar Shorts, ejecutar Atrás y cubrir brevemente el video. No guarda ni envía el contenido.</string>
+    <string name="privacy_body">Sin internet, cuentas, anuncios ni capturas. La configuración queda en el dispositivo. Accesibilidad procesa la interfaz visible solo en YouTube, Instagram y TikTok; Datos de uso calcula localmente su tiempo en primer plano.</string>
+    <string name="personal_mode_limitation">Modo personal · Android permite desactivar permisos o desinstalar la app. Un PIN o guardián remoto requerirá una fase posterior.</string>
+
+    <string name="overlay_shorts_title">Video corto bloqueado</string>
+    <string name="overlay_shorts_detail">Brainrot Shield salió del feed de %1$s.</string>
+    <string name="overlay_limit_title">Tiempo diario terminado</string>
+    <string name="overlay_limit_detail">Usaste %1$s de un límite de %2$s. El contador se reinicia a medianoche.</string>
+    <string name="overlay_schedule_title">Ventana de enfoque activa</string>
+    <string name="overlay_schedule_detail">%1$s está bloqueada durante %2$s.</string>
+
+    <string name="accessibility_service_description">Detecta videos cortos y aplica reglas locales en YouTube, Instagram y TikTok. Puede ejecutar Atrás o Inicio y mostrar un aviso; no guarda ni envía el contenido.</string>
     <string name="accessibility_disclosure_title">Antes de activar Accesibilidad</string>
-    <string name="accessibility_disclosure_body">Brainrot Shield usa el servicio de Accesibilidad para leer la estructura visible de la app oficial de YouTube y detectar el feed de Shorts. Cuando coincide, silencia brevemente el audio, muestra una protección negra y ejecuta Atrás automáticamente. No toma capturas, no guarda texto o historial y no envía datos fuera del dispositivo. Podés desactivarlo cuando quieras desde Ajustes. ¿Aceptás este uso y querés continuar?</string>
+    <string name="accessibility_disclosure_body">Brainrot Shield usa Accesibilidad para leer de forma transitoria la estructura visible de YouTube, Instagram y TikTok. Esto permite reconocer Shorts, Reels y feeds verticales, comprobar si una app protegida está abierta, mostrar un aviso y ejecutar Atrás o Inicio cuando una regla corresponde. No toma capturas, no lee contraseñas, no conserva el texto observado y no envía datos fuera del dispositivo. Podés desactivarlo cuando quieras desde Ajustes. ¿Aceptás este uso y querés continuar?</string>
+    <string name="usage_disclosure_title">Antes de conceder Datos de uso</string>
+    <string name="usage_disclosure_body">Para aplicar el límite diario, Brainrot Shield consulta localmente cuánto tiempo estuvieron en primer plano YouTube, Instagram y TikTok y cuál aplicación está activa. No guarda el historial de otras apps, no crea perfiles y no transmite información. Este acceso es opcional: sin él, el bloqueo de videos cortos sigue funcionando, pero el límite diario no. ¿Querés continuar?</string>
+
     <string name="cancel">Cancelar</string>
+    <string name="not_now">Ahora no</string>
     <string name="accept_and_continue">Aceptar y continuar</string>
+    <string name="save">Guardar</string>
+    <string name="remove">Quitar</string>
 </resources>

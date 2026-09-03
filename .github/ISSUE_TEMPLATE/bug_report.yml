@@ -11,7 +11,7 @@ body:
     id: app_version
     attributes:
       label: Brainrot Shield version
-      placeholder: 1.1.0
+      placeholder: 1.2.0
     validations:
       required: true
   - type: input
@@ -26,7 +26,7 @@ body:
     id: target_app
     attributes:
       label: Target app and version
-      placeholder: YouTube 21.x
+      placeholder: YouTube 21.x, Instagram 400.x, or TikTok 42.x
     validations:
       required: true
   - type: textarea

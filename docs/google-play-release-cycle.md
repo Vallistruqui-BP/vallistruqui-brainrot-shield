@@ -86,6 +86,7 @@ Human-reviewed inputs:
 - Target audience and content declaration.
 - Data safety declaration.
 - AccessibilityService declaration and supporting review video.
+- Usage Access behavior, necessity, user-facing disclosure, and Data safety treatment.
 - Any parental-control or device-management declarations introduced by a future Managed edition.
 
 Brainrot Shield is not a general accessibility tool for people with disabilities and must not set `isAccessibilityTool=true`. Before sending users to Android Accessibility settings, the app must provide a separate prominent disclosure that states:
@@ -97,6 +98,8 @@ Brainrot Shield is not a general accessibility tool for people with disabilities
 - how the user can disable the feature.
 
 The user must affirmatively accept that disclosure. A privacy policy and Data safety form remain required even if the current build collects and shares no user data.
+
+The combined daily limit also declares `PACKAGE_USAGE_STATS`. Android requires the user to grant this special access in Settings. Brainrot Shield must present its separate Usage Access disclosure immediately before opening that setting, explain that it reads foreground timing locally, and keep the feature optional so short-form blocking still works without it. The implementation must not retain or transmit a detailed history of unrelated apps.
 
 The protection screen uses `TYPE_ACCESSIBILITY_OVERLAY`, which is supplied by the enabled AccessibilityService. The app does not request `SYSTEM_ALERT_WINDOW`; reintroducing that permission requires a new necessity and policy review.
 
@@ -123,6 +126,7 @@ The release candidate must pass:
 8. Large-text, screen-reader, dark-mode, landscape, small-phone, and tablet checks.
 9. Permission denial, permission revocation, service teardown, volume restoration, and false-positive checks.
 10. Review that no accessibility text, account name, video metadata, or private content is logged or transmitted.
+11. Verify Usage Access denial, revocation, local-midnight reset, combined totals, and foreground transitions without retaining unrelated app history.
 
 New apps and updates submitted after 2026-08-31 must target API 36 or higher. This project already targets API 36.
 

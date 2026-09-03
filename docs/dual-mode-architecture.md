@@ -106,9 +106,9 @@ All touch targets must be at least 48dp, content must tolerate system text scali
 
 One application identity can evolve toward both modes, but release risk is staged:
 
-1. Publish the smallest compliant Personal build with YouTube protection, prominent Accessibility disclosure, no networking, and no remote backend.
-2. Establish internal and closed testing and obtain the initial policy review.
-3. Add Instagram and TikTok detectors with explicit package scoping and a renewed Accessibility declaration.
+1. Validate the Personal build with YouTube, Instagram, and TikTok package scoping, prominent Accessibility and Usage Access disclosures, local daily limits, focus windows, and no networking or remote backend.
+2. Publish the smallest tested subset whose detector evidence is stable enough for Play review.
+3. Establish internal and closed testing and obtain the initial policy review.
 4. Add optional local PIN configuration, still clearly labeled as in-app protection.
 5. Add remote guardian pairing only after networking, privacy, account deletion, security, abuse prevention, Data safety, and consent reviews pass.
 6. Add Managed mode only after device-policy provisioning and parental/administrative policy requirements pass an independent review.
