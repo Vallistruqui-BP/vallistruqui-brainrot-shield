@@ -1,0 +1,68 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.vallistruqui.brainrotshield'
+    compileSdk 36
+    buildToolsVersion '36.1.0'
+
+    defaultConfig {
+        applicationId 'com.vallistruqui.brainrotshield'
+        minSdk 23
+        targetSdk 36
+        versionCode 2
+        versionName '1.1.0'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
+    androidResources {
+        ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!desktop.ini:!picasa.ini:!*~'
+    }
+
+    lint {
+        abortOnError true
+        checkReleaseBuilds true
+        // Gradle 8.13 is the compatibility baseline documented for AGP 8.13.
+        disable 'AndroidGradlePluginVersion'
+    }
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+}
+
+tasks.register('exportDebugApk', Copy) {
+    dependsOn 'assembleDebug'
+    from layout.buildDirectory.dir('outputs/apk/debug')
+    include 'app-debug.apk'
+    into rootProject.layout.projectDirectory.dir('artifacts')
+    rename 'app-debug.apk', 'vallistruqui-brainrot-shield-debug.apk'
+}
+
+def javacName = System.getProperty('os.name').toLowerCase().contains('windows')
+        ? 'javac.exe'
+        : 'javac'
+def localJavac = new File(System.getProperty('java.home'), 'bin/' + javacName)
+
+tasks.withType(JavaCompile).configureEach {
+    // An explicit executable keeps compilation compatible with restricted local
+    // environments where Gradle worker-daemon loopback sockets are unavailable.
+    options.fork = true
+    options.forkOptions.executable = localJavac.absolutePath
+}

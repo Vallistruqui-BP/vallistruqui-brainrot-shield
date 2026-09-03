@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Brainrot Shield</string>
+    <string name="hero_eyebrow">CONTROL DE ATENCIÓN</string>
+    <string name="hero_title">YouTube sin Shorts.</string>
+    <string name="hero_body">Cuando detecta el feed de Shorts, la app silencia el audio, cubre la pantalla y vuelve atrás automáticamente.</string>
+    <string name="setup_title">Configuración</string>
+    <string name="setup_body">Activá el servicio una sola vez. La protección visual está incluida y no necesita permiso para aparecer sobre otras apps.</string>
+    <string name="accessibility_title">Servicio de accesibilidad</string>
+    <string name="accessibility_body">Permite leer la estructura visible de YouTube, reconocer el feed de Shorts y ejecutar Atrás automáticamente.</string>
+    <string name="youtube_title">YouTube oficial</string>
+    <string name="youtube_body">La primera versión está limitada a com.google.android.youtube.</string>
+    <string name="enable_accessibility">Activar servicio de accesibilidad</string>
+    <string name="open_youtube">Abrir YouTube para probar</string>
+    <string name="status_active">Activo</string>
+    <string name="status_inactive">Inactivo</string>
+    <string name="status_installed">Instalado</string>
+    <string name="status_not_found">No encontrado</string>
+    <string name="privacy_title">Privacidad por diseño</string>
+    <string name="privacy_body">Sin internet, sin cuentas, sin capturas y sin historial. El servicio recibe eventos solamente de YouTube y procesa la interfaz visible en el dispositivo.</string>
+    <string name="limitation">MVP local · YouTube puede cambiar sus etiquetas internas y requerir recalibración.</string>
+    <string name="overlay_message">Shorts bloqueados</string>
+    <string name="youtube_not_installed">No se encontró la app oficial de YouTube.</string>
+    <string name="accessibility_service_description">Lee la estructura visible de YouTube para detectar Shorts, ejecutar Atrás y cubrir brevemente el video. No guarda ni envía el contenido.</string>
+    <string name="accessibility_disclosure_title">Antes de activar Accesibilidad</string>
+    <string name="accessibility_disclosure_body">Brainrot Shield usa el servicio de Accesibilidad para leer la estructura visible de la app oficial de YouTube y detectar el feed de Shorts. Cuando coincide, silencia brevemente el audio, muestra una protección negra y ejecuta Atrás automáticamente. No toma capturas, no guarda texto o historial y no envía datos fuera del dispositivo. Podés desactivarlo cuando quieras desde Ajustes. ¿Aceptás este uso y querés continuar?</string>
+    <string name="cancel">Cancelar</string>
+    <string name="accept_and_continue">Aceptar y continuar</string>
+</resources>

@@ -1,0 +1,13 @@
+plugins {
+    id 'com.android.application' version '8.13.2' apply false
+}
+
+// Google Drive for Desktop injects desktop.ini into every directory under this
+// workspace. Android's resource linker rejects those files in generated resource
+// folders, so build intermediates live in Gradle's local cache instead.
+def localBuildRoot = new File(gradle.gradleUserHomeDir, 'vallistruqui-brainrot-shield-build')
+layout.buildDirectory = new File(localBuildRoot, 'root')
+
+subprojects {
+    layout.buildDirectory = new File(localBuildRoot, project.name)
+}
