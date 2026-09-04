@@ -123,9 +123,10 @@ The release candidate must pass:
 5. Tests on every supported Android API tier.
 6. Tests on representative Pixel/stock Android, Samsung, Xiaomi/HyperOS, Motorola, and Oppo/Realme devices when available.
 7. Tests against the current supported YouTube, Instagram, and TikTok versions and supported locales.
-8. Large-text, screen-reader, dark-mode, landscape, small-phone, and tablet checks.
-9. Permission denial, permission revocation, service teardown, volume restoration, and false-positive checks.
-10. Review that no accessibility text, account name, video metadata, or private content is logged or transmitted.
+8. YouTube playback-control testing with its Accessibility Player both enabled and disabled, including a finite hide timeout.
+9. Large-text, screen-reader, dark-mode, landscape, small-phone, and tablet checks.
+10. Permission denial, permission revocation, service teardown, volume restoration, and false-positive checks.
+11. Review that no accessibility text, account name, video metadata, or private content is logged or transmitted.
 11. Verify Usage Access denial, revocation, local-midnight reset, combined totals, and foreground transitions without retaining unrelated app history.
 12. Verify PIN setup, relock after leaving the app, current-PIN checks for replacement/removal, progressive retry delays, large text, rotation, process recreation, and explicit disclosure that clearing data or uninstalling bypasses Personal-mode protection.
 

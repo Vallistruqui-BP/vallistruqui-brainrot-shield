@@ -345,6 +345,34 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/open_app_to_test" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:background="@color/line" />
+
+                <TextView
+                    style="@style/CardTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/youtube_controls_help_title" />
+
+                <TextView
+                    style="@style/BodyTextSmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/youtube_controls_help_body" />
+
+                <Button
+                    android:id="@+id/youtube_controls_help_button"
+                    style="@style/TertiaryButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/youtube_controls_help_action" />
             </LinearLayout>
 
             <TextView

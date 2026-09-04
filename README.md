@@ -11,7 +11,7 @@ The current app works entirely on the device and supports the official Android p
 - Instagram (`com.instagram.android`)
 - TikTok (`com.zhiliaoapp.musically`)
 
-> **Project status:** experimental open-source release. The Android implementation and automated tests are complete for version 1.3.0, but the Instagram and TikTok heuristics and settings-access flow still need validation on representative real devices before production compatibility is claimed. The app has not yet been published on Google Play.
+> **Project status:** experimental open-source release. The Android implementation and automated tests are complete for version 1.3.1, but the Instagram and TikTok heuristics, settings-access flow, and YouTube compatibility guidance still need validation on representative real devices before production compatibility is claimed. The app has not yet been published on Google Play.
 
 ## What is included
 
@@ -27,6 +27,7 @@ The current app works entirely on the device and supports the official Android p
 - Automatic system light/dark theme support with semantic color resources.
 - An optional 6-to-12-digit administrator PIN that hides and locks the entire settings panel whenever the app is left.
 - Salted PBKDF2 PIN verification, constant-time hash comparison, and progressive retry delays after repeated failures. The PIN itself is never stored.
+- An in-app YouTube compatibility guide for disabling YouTube's automatically selected Accessibility Player or giving its playback controls a finite hide timeout.
 - Media-volume restoration and a cooldown to prevent repeated navigation actions.
 - Local preferences only: no server, Internet permission, accounts, analytics, advertising, screenshots, or storage of accessibility content.
 
@@ -93,10 +94,11 @@ If Gradle reports a PKIX certificate-chain error on Windows, run the build with 
 2. Optionally create a **PIN de administrador**. Record it securely; there is no local recovery flow.
 3. Under **Apps protegidas**, choose YouTube, Instagram, and/or TikTok.
 4. Tap **Configurar accesibilidad**, read the disclosure, accept it, and enable Brainrot Shield in Android Accessibility settings.
-5. Enable or disable **Bloquear videos cortos**.
-6. To use the combined daily limit, enable it, accept the separate Usage Access disclosure, and grant access in Android settings.
-7. Configure the daily allowance and any focus windows.
-8. Check **Protección actual**, then tap **Bloquear configuración ahora** before handing the device back to the protected user.
+5. Follow the one-time YouTube compatibility message. In YouTube, open **Profile > Settings > Accessibility** and turn off **Accessibility Player**, or choose a finite **Hide player controls** timeout. This YouTube-only override does not disable Brainrot Shield.
+6. Enable or disable **Bloquear videos cortos**.
+7. To use the combined daily limit, enable it, accept the separate Usage Access disclosure, and grant access in Android settings.
+8. Configure the daily allowance and any focus windows.
+9. Check **Protección actual**, then tap **Bloquear configuración ahora** before handing the device back to the protected user.
 
 On some Samsung and Android versions, a sideloaded app can show a disabled accessibility switch. Open the Android app-info screen for Brainrot Shield, use the overflow menu, allow restricted settings, and try again.
 
@@ -106,11 +108,13 @@ Because the application ID changed from the earliest local prototype, installing
 
 Brainrot Shield follows the Android system theme. The light and dark palettes define independent canvas, surface, text, divider, status, accent, and interaction colors rather than relying on automatic color inversion. Full visual verification still requires a physical device or emulator in both modes.
 
-## YouTube playback-controls regression
+## YouTube playback controls
 
 Version 1.2.0 and later remove click events from the accessibility-service subscription, stop requesting unnecessary interactive-window and not-important-view flags, and delete the previous weak rule that combined an unselected Shorts navigation label with three ordinary video actions. A unit regression test verifies that showing Like, Comments, Share, pause, skip, or timeline controls on a long-form YouTube video does not classify that screen as Shorts.
 
-If YouTube still keeps its controls visible after this change, test the same video once with Brainrot Shield disabled in Accessibility settings. If the behavior occurs only while the service is enabled, it may be YouTube adapting its player to the presence of any accessibility service rather than Brainrot Shield performing a touch or holding the screen; this app never sends touch gestures or long-press actions.
+The remaining sticky-control behavior is YouTube's own Accessibility Player. YouTube can automatically enable that player when it detects an active Android accessibility setting. When its hide timeout is **Never**, pause, seek, skip, and timeline controls remain visible and normal taps do not dismiss them. Brainrot Shield does not send touch gestures, hold the screen, request touch-exploration mode, or make its blocking overlay touchable.
+
+Version 1.3.1 shows a one-time compatibility explanation once YouTube and Brainrot Shield's accessibility service are active, and keeps the same instructions available under **Apps protegidas**. The supported correction is inside YouTube: open **Profile > Settings > Accessibility**, then turn off **Accessibility Player** or set **Hide player controls** to a finite timeout. Android does not allow Brainrot Shield to silently change another app's private preference.
 
 ## Google Play publication
 

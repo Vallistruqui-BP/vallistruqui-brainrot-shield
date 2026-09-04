@@ -33,6 +33,7 @@
 ## Review focus
 
 - Prevent false positives on ordinary YouTube/Instagram screens and long-form YouTube video controls.
+- Keep the YouTube Accessibility Player workaround explicit and user-controlled; do not inject taps or depend on undocumented YouTube settings activities.
 - Treat a Shorts/Reels navigation label plus generic post controls as insufficient evidence on YouTube and Instagram.
 - Verify light and dark palettes, large text, 48dp touch targets, overnight windows, pause expiry, missing Usage Access states, PIN setup, relock, replacement, removal, and retry lockout.
 - Verify service configuration, prominent disclosure, accessibility-overlay behavior, cooldown behavior, and volume restoration.

@@ -34,7 +34,8 @@ The app stores the following configuration locally in Android private app storag
 - enabled or disabled restrictions;
 - combined daily-limit duration;
 - configured focus windows; and
-- expiration timestamps for temporary pauses.
+- expiration timestamps for temporary pauses; and
+- whether the one-time YouTube playback-controls compatibility guide has already been shown.
 
 If the administrator PIN is enabled, a separate private preference file also stores:
 

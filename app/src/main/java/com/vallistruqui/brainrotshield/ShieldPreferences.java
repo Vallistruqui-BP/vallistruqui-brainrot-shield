@@ -18,6 +18,8 @@ final class ShieldPreferences {
     private static final String KEY_PAUSE_SHORTS_UNTIL = "pause_shorts_until";
     private static final String KEY_PAUSE_LIMIT_UNTIL = "pause_limit_until";
     private static final String KEY_PAUSE_SCHEDULE_UNTIL = "pause_schedule_until";
+    private static final String KEY_YOUTUBE_CONTROLS_GUIDANCE_SHOWN =
+            "youtube_controls_guidance_shown";
 
     static final int DEFAULT_DAILY_LIMIT_MINUTES = 120;
     static final int MIN_DAILY_LIMIT_MINUTES = 15;
@@ -141,6 +143,14 @@ final class ShieldPreferences {
             }
         }
         return enabled;
+    }
+
+    boolean hasShownYouTubeControlsGuidance() {
+        return preferences.getBoolean(KEY_YOUTUBE_CONTROLS_GUIDANCE_SHOWN, false);
+    }
+
+    void markYouTubeControlsGuidanceShown() {
+        preferences.edit().putBoolean(KEY_YOUTUBE_CONTROLS_GUIDANCE_SHOWN, true).apply();
     }
 
     private static String pauseKey(RestrictionType restriction) {

@@ -85,6 +85,12 @@
     <string name="all_supported_apps_found">Instaladas: %1$s.</string>
     <string name="some_supported_apps_found">Instaladas: %1$s. No encontradas: %2$s.</string>
     <string name="app_not_installed">No se encontró %1$s.</string>
+    <string name="youtube_controls_help_title">¿Los controles de YouTube quedan fijos?</string>
+    <string name="youtube_controls_help_body">YouTube puede activar automáticamente su Reproductor de accesibilidad al detectar el servicio. Brainrot Shield no mantiene la pantalla presionada ni intercepta tus toques.</string>
+    <string name="youtube_controls_help_action">Ver cómo corregir los controles</string>
+    <string name="youtube_controls_help_dialog_title">Corregir controles fijos de YouTube</string>
+    <string name="youtube_controls_help_dialog_body">Este comportamiento pertenece a YouTube. Para recuperar los controles que se ocultan al tocar:\n\n1. Abrí YouTube y tocá tu perfil.\n2. Entrá en Configuración.\n3. Abrí Accesibilidad.\n4. Desactivá “Reproductor de accesibilidad”.\n\nSi necesitás ese reproductor, dejalo activo y elegí un tiempo en “Ocultar controles del reproductor”, en lugar de “Nunca”. Esta opción de YouTube no desactiva Brainrot Shield.</string>
+    <string name="open_youtube">Abrir YouTube</string>
 
     <string name="restrictions_title">Restricciones</string>
     <string name="restrictions_body">Cada regla se activa y se pausa por separado. Las pausas terminan automáticamente.</string>
@@ -144,7 +150,7 @@
 
     <string name="accessibility_service_description">Detecta videos cortos y aplica reglas locales en YouTube, Instagram y TikTok. Puede ejecutar Atrás o Inicio y mostrar un aviso; no guarda ni envía el contenido.</string>
     <string name="accessibility_disclosure_title">Antes de activar Accesibilidad</string>
-    <string name="accessibility_disclosure_body">Brainrot Shield usa Accesibilidad para leer de forma transitoria la estructura visible de YouTube, Instagram y TikTok. Esto permite reconocer Shorts, Reels y feeds verticales, comprobar si una app protegida está abierta, mostrar un aviso y ejecutar Atrás o Inicio cuando una regla corresponde. No toma capturas, no lee contraseñas, no conserva el texto observado y no envía datos fuera del dispositivo. Podés desactivarlo cuando quieras desde Ajustes. ¿Aceptás este uso y querés continuar?</string>
+    <string name="accessibility_disclosure_body">Brainrot Shield usa Accesibilidad para leer de forma transitoria la estructura visible de YouTube, Instagram y TikTok. Esto permite reconocer Shorts, Reels y feeds verticales, comprobar si una app protegida está abierta, mostrar un aviso y ejecutar Atrás o Inicio cuando una regla corresponde. No toma capturas, no lee contraseñas, no conserva el texto observado y no envía datos fuera del dispositivo. YouTube puede activar su propio Reproductor de accesibilidad; la app incluye el paso para desactivarlo sin apagar Brainrot Shield. Podés desactivar el servicio cuando quieras desde Ajustes. ¿Aceptás este uso y querés continuar?</string>
     <string name="usage_disclosure_title">Antes de conceder Datos de uso</string>
     <string name="usage_disclosure_body">Para aplicar el límite diario, Brainrot Shield consulta localmente cuánto tiempo estuvieron en primer plano YouTube, Instagram y TikTok y cuál aplicación está activa. No guarda el historial de otras apps, no crea perfiles y no transmite información. Este acceso es opcional: sin él, el bloqueo de videos cortos sigue funcionando, pero el límite diario no. ¿Querés continuar?</string>
 
@@ -153,4 +159,5 @@
     <string name="accept_and_continue">Aceptar y continuar</string>
     <string name="save">Guardar</string>
     <string name="remove">Quitar</string>
+    <string name="close">Cerrar</string>
 </resources>

@@ -109,6 +109,8 @@ public final class MainActivity extends Activity {
                 ignored -> showUsageAccessDisclosure());
         findViewById(R.id.open_test_app_button).setOnClickListener(
                 ignored -> showAppLauncher());
+        findViewById(R.id.youtube_controls_help_button).setOnClickListener(
+                ignored -> showYouTubeControlsGuidance());
         findViewById(R.id.change_daily_limit_button).setOnClickListener(
                 ignored -> showDailyLimitDialog());
         addTimeWindowButton.setOnClickListener(ignored -> addTimeWindow());
@@ -174,6 +176,7 @@ public final class MainActivity extends Activity {
             setSettingsContentVisible(true);
         }
         refreshStatus();
+        maybeShowYouTubeControlsGuidance();
     }
 
     private void bindSwitches() {
@@ -302,6 +305,7 @@ public final class MainActivity extends Activity {
                     refreshStatus();
                     pageRoot.announceForAccessibility(getString(R.string.settings_unlocked));
                     dialog.dismiss();
+                    maybeShowYouTubeControlsGuidance();
                     return;
                 }
                 showPinVerificationError(pin, result);
@@ -712,6 +716,32 @@ public final class MainActivity extends Activity {
             return;
         }
         startActivity(launchIntent);
+    }
+
+    private void maybeShowYouTubeControlsGuidance() {
+        boolean youtubeInstalled = getPackageManager().getLaunchIntentForPackage(
+                ProtectedApp.YOUTUBE.packageName()) != null;
+        if (!YouTubeCompatibility.shouldOfferControlsGuidance(
+                isAccessibilityServiceEnabled(),
+                settingsUnlocked,
+                preferences.isAppEnabled(ProtectedApp.YOUTUBE),
+                youtubeInstalled,
+                preferences.hasShownYouTubeControlsGuidance())) {
+            return;
+        }
+
+        preferences.markYouTubeControlsGuidanceShown();
+        showYouTubeControlsGuidance();
+    }
+
+    private void showYouTubeControlsGuidance() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.youtube_controls_help_dialog_title)
+                .setMessage(R.string.youtube_controls_help_dialog_body)
+                .setNegativeButton(R.string.close, null)
+                .setPositiveButton(R.string.open_youtube,
+                        (dialog, which) -> openApp(ProtectedApp.YOUTUBE))
+                .show();
     }
 
     private void showDailyLimitDialog() {
