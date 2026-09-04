@@ -27,12 +27,13 @@
 - Do not reintroduce the system overlay permission while TYPE_ACCESSIBILITY_OVERLAY can provide the protection screen.
 - Restore media volume after every blocking action and during service teardown.
 - Keep short-form, daily-limit, and focus-window rules independently configurable and pausable.
+- Keep the administrator PIN local, non-reversible, rate-limited, and limited to the in-app settings boundary; never claim it prevents system uninstall or app-data clearing.
 - Keep Gradle build intermediates outside the Google Drive-synchronized workspace; desktop.ini breaks AAPT generated resources.
 
 ## Review focus
 
 - Prevent false positives on ordinary YouTube/Instagram screens and long-form YouTube video controls.
 - Treat a Shorts/Reels navigation label plus generic post controls as insufficient evidence on YouTube and Instagram.
-- Verify light and dark palettes, large text, 48dp touch targets, overnight windows, pause expiry, and missing Usage Access states.
+- Verify light and dark palettes, large text, 48dp touch targets, overnight windows, pause expiry, missing Usage Access states, PIN setup, relock, replacement, removal, and retry lockout.
 - Verify service configuration, prominent disclosure, accessibility-overlay behavior, cooldown behavior, and volume restoration.
 - Update README.md when setup steps, supported apps, or permissions change.

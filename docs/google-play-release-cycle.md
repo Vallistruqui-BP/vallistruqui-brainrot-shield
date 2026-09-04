@@ -1,6 +1,6 @@
 # Google Play release lifecycle
 
-Last verified: 2026-09-03
+Last verified: 2026-09-04
 
 This playbook records the release process for Vallistruqui Brainrot Shield. It is deliberately split into human gates and automatable operations so a future release plugin never hides policy, identity, signing, or production-impact decisions.
 
@@ -127,6 +127,7 @@ The release candidate must pass:
 9. Permission denial, permission revocation, service teardown, volume restoration, and false-positive checks.
 10. Review that no accessibility text, account name, video metadata, or private content is logged or transmitted.
 11. Verify Usage Access denial, revocation, local-midnight reset, combined totals, and foreground transitions without retaining unrelated app history.
+12. Verify PIN setup, relock after leaving the app, current-PIN checks for replacement/removal, progressive retry delays, large text, rotation, process recreation, and explicit disclosure that clearing data or uninstalling bypasses Personal-mode protection.
 
 New apps and updates submitted after 2026-08-31 must target API 36 or higher. This project already targets API 36.
 

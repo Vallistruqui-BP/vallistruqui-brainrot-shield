@@ -1,6 +1,6 @@
 # Privacy policy
 
-Effective date: September 3, 2026
+Effective date: September 4, 2026
 
 Vallistruqui Brainrot Shield performs its current blocking and time-management behavior entirely on the Android device.
 
@@ -36,6 +36,15 @@ The app stores the following configuration locally in Android private app storag
 - configured focus windows; and
 - expiration timestamps for temporary pauses.
 
+If the administrator PIN is enabled, a separate private preference file also stores:
+
+- a random cryptographic salt;
+- a PBKDF2-derived PIN hash;
+- the number of consecutive failed attempts; and
+- the expiration time of any temporary retry lockout.
+
+The numeric PIN itself is not stored. The derived hash is used only on the device to decide whether to reveal the settings panel.
+
 These preferences are not backed up by the app and are removed when the app's data is cleared or the app is uninstalled.
 
 ## What the current version does not do
@@ -46,7 +55,7 @@ The current version:
 - does not create user accounts;
 - does not collect, sell, share, or transmit personal data;
 - does not use analytics, advertising SDKs, or tracking;
-- does not capture screenshots, record audio, or read typed passwords;
+- does not capture screenshots, record audio, or read passwords typed in other applications;
 - does not store accessibility content or detailed app-usage history; and
 - does not provide remote guardian or device-management functionality.
 
@@ -56,9 +65,9 @@ When a rule applies, the app may briefly mute media, show a non-interactive acce
 
 ## Choice and control
 
-Accessibility and Usage Access are separate optional settings. Short-form detection requires Accessibility. The combined daily limit requires Usage Access. Users can select which supported apps and restrictions apply, temporarily pause individual restrictions, revoke either access from Android settings, clear app data, or uninstall the app.
+Accessibility and Usage Access are separate optional settings. Short-form detection requires Accessibility. The combined daily limit requires Usage Access. An optional administrator PIN can restrict who sees or edits the in-app configuration. After the app leaves the foreground, reopening the panel requires that PIN.
 
-An ordinary Android app cannot guarantee that a local PIN prevents its own system-level uninstall. The current Personal build does not attempt to obstruct Android security or uninstall interfaces.
+An ordinary Android app cannot guarantee that a local PIN prevents its own system-level uninstall. A person with device-level control can revoke access, clear app data, or uninstall Brainrot Shield. Clearing app data deletes the PIN hash and every configured rule. The current Personal build does not attempt to obstruct Android security or uninstall interfaces.
 
 ## Retention and deletion
 

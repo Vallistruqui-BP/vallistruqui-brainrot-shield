@@ -20,6 +20,47 @@
     <string name="usage_today">%1$s usados de %2$s</string>
     <string name="none">Ninguna</string>
 
+    <string name="settings_access_title">Control de acceso</string>
+    <string name="settings_access_body">Un tutor o administrador puede proteger la configuración. Las reglas siguen funcionando aunque el panel esté bloqueado.</string>
+    <string name="admin_pin_title">PIN de administrador</string>
+    <string name="admin_pin_body">Cuando está activo, se pide el PIN antes de mostrar o editar apps, límites, horarios y pausas. La app se vuelve a bloquear al salir.</string>
+    <string name="admin_pin_limitation">El PIN protege este panel, pero un usuario con control total del dispositivo todavía puede borrar los datos o desinstalar la app. El bloqueo real de desinstalación requiere supervisión parental o administración del dispositivo.</string>
+    <string name="status_pin_protected">Protegido</string>
+    <string name="status_pin_unprotected">Sin PIN</string>
+    <string name="create_admin_pin">Crear PIN de administrador</string>
+    <string name="change_admin_pin">Cambiar PIN de administrador</string>
+    <string name="lock_settings_now">Bloquear configuración ahora</string>
+    <string name="remove_admin_pin">Quitar PIN de administrador</string>
+    <string name="unlock_settings_title">Configuración protegida</string>
+    <string name="unlock_settings_body">Ingresá el PIN del tutor o administrador para ver y modificar la configuración. La protección continúa activa si salís.</string>
+    <string name="create_pin_body">Elegí entre 6 y 12 dígitos y repetilos. No existe recuperación local: si se olvida el PIN, borrar los datos de la app también elimina la configuración.</string>
+    <string name="admin_pin_label">PIN de administrador</string>
+    <string name="current_admin_pin_label">PIN actual</string>
+    <string name="new_admin_pin_label">PIN nuevo</string>
+    <string name="confirm_admin_pin_label">Repetir PIN nuevo</string>
+    <string name="pin_hint">6 a 12 dígitos</string>
+    <string name="verify_admin_pin_title">Confirmar identidad</string>
+    <string name="verify_pin_to_change">Ingresá el PIN actual antes de reemplazarlo.</string>
+    <string name="verify_pin_to_remove">Ingresá el PIN actual antes de quitar la protección.</string>
+    <string name="pin_requirements_error">Usá solamente números, entre 6 y 12 dígitos.</string>
+    <string name="pin_mismatch_error">Los PIN no coinciden.</string>
+    <string name="pin_incorrect_error">PIN incorrecto.</string>
+    <plurals name="pin_locked_error">
+        <item quantity="one">Demasiados intentos. Volvé a probar en %1$d segundo.</item>
+        <item quantity="other">Demasiados intentos. Volvé a probar en %1$d segundos.</item>
+    </plurals>
+    <string name="pin_verification_error">No se pudo verificar el PIN. Volvé a intentarlo.</string>
+    <string name="pin_save_error">No se pudo guardar el PIN de forma segura.</string>
+    <string name="pin_saved">PIN de administrador guardado.</string>
+    <string name="settings_unlocked">Configuración desbloqueada.</string>
+    <string name="remove_admin_pin_title">Quitar protección</string>
+    <string name="remove_admin_pin_body">Sin PIN, cualquier persona que abra Brainrot Shield podrá cambiar o pausar las reglas. ¿Querés continuar?</string>
+    <string name="pin_removed">PIN de administrador eliminado.</string>
+    <string name="pin_remove_error">No se pudo quitar el PIN.</string>
+    <string name="exit_app">Salir</string>
+    <string name="unlock">Desbloquear</string>
+    <string name="continue_action">Continuar</string>
+
     <string name="permissions_title">Permisos necesarios</string>
     <string name="permissions_body">Cada acceso se explica antes de abrir Ajustes. Podés usar el bloqueo de videos cortos sin activar el límite diario.</string>
     <string name="accessibility_title">Servicio de accesibilidad</string>
@@ -92,7 +133,7 @@
 
     <string name="privacy_title">Privacidad por diseño</string>
     <string name="privacy_body">Sin internet, cuentas, anuncios ni capturas. La configuración queda en el dispositivo. Accesibilidad procesa la interfaz visible solo en YouTube, Instagram y TikTok; Datos de uso calcula localmente su tiempo en primer plano.</string>
-    <string name="personal_mode_limitation">Modo personal · Android permite desactivar permisos o desinstalar la app. Un PIN o guardián remoto requerirá una fase posterior.</string>
+    <string name="personal_mode_limitation">Modo personal · El PIN protege los ajustes dentro de Brainrot Shield. Android todavía permite borrar datos, desactivar permisos o desinstalar la app desde Ajustes.</string>
 
     <string name="overlay_shorts_title">Video corto bloqueado</string>
     <string name="overlay_shorts_detail">Brainrot Shield salió del feed de %1$s.</string>

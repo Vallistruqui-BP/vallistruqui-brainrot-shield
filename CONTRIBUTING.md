@@ -30,6 +30,7 @@ Before submitting a pull request, make sure tests and Android lint pass. Add foc
 - Keep Usage Access processing transient and limited to foreground detection plus aggregate time calculations for supported apps.
 - Do not add analytics, advertising, screenshots, key logging, hidden persistence, or collection of accessibility content.
 - Do not intercept or obstruct Android's uninstall or security interfaces through accessibility automation.
+- Never store an administrator PIN in plaintext or log PIN input, hashes, salts, verification results, or lockout state.
 - Treat Personal and Managed modes as different security models. Only legitimate Android Device Owner or Profile Owner enrollment may claim managed uninstall restrictions.
 - Restore media volume after every blocking attempt and service shutdown.
 - Add regression fixtures for ordinary screens whenever changing a short-form detector; a navigation label by itself is not enough evidence.

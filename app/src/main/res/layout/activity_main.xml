@@ -100,6 +100,92 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
+                android:text="@string/settings_access_title" />
+
+            <TextView
+                style="@style/BodyText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/settings_access_body" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/panel_background"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/CardTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/admin_pin_title" />
+
+                    <TextView
+                        android:id="@+id/settings_access_status"
+                        style="@style/StatusChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/status_warning_background"
+                        android:text="@string/status_pin_unprotected"
+                        android:textColor="@color/status_warning_text" />
+                </LinearLayout>
+
+                <TextView
+                    style="@style/BodyTextSmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/admin_pin_body" />
+
+                <Button
+                    android:id="@+id/configure_pin_button"
+                    style="@style/PrimaryButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/create_admin_pin" />
+
+                <Button
+                    android:id="@+id/lock_now_button"
+                    style="@style/SecondaryButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/lock_settings_now"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/remove_pin_button"
+                    style="@style/DangerButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:text="@string/remove_admin_pin"
+                    android:visibility="gone" />
+
+                <TextView
+                    style="@style/HelperText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/admin_pin_limitation" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/SectionTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
                 android:text="@string/permissions_title" />
 
             <TextView

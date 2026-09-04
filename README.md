@@ -11,7 +11,7 @@ The current app works entirely on the device and supports the official Android p
 - Instagram (`com.instagram.android`)
 - TikTok (`com.zhiliaoapp.musically`)
 
-> **Project status:** experimental open-source release. The Android implementation and automated tests are complete for version 1.2.0, but the Instagram and TikTok heuristics still need calibration on representative real devices and current app versions before production compatibility is claimed. The app has not yet been published on Google Play.
+> **Project status:** experimental open-source release. The Android implementation and automated tests are complete for version 1.3.0, but the Instagram and TikTok heuristics and settings-access flow still need validation on representative real devices before production compatibility is claimed. The app has not yet been published on Google Play.
 
 ## What is included
 
@@ -25,6 +25,8 @@ The current app works entirely on the device and supports the official Android p
 - A large full-screen explanation before the app exits because of a daily limit or focus window.
 - A shorter full-screen explanation when a short-form feed is detected.
 - Automatic system light/dark theme support with semantic color resources.
+- An optional 6-to-12-digit administrator PIN that hides and locks the entire settings panel whenever the app is left.
+- Salted PBKDF2 PIN verification, constant-time hash comparison, and progressive retry delays after repeated failures. The PIN itself is never stored.
 - Media-volume restoration and a cooldown to prevent repeated navigation actions.
 - Local preferences only: no server, Internet permission, accounts, analytics, advertising, screenshots, or storage of accessibility content.
 
@@ -48,7 +50,13 @@ During any enabled focus window, the selected apps are blocked completely. The a
 
 ### Temporary pauses
 
-Each rule has its own pause control. A user can resume immediately or pause for 15 minutes, 30 minutes, one hour, two hours, or until the next local midnight. This is a Personal-mode convenience, not tamper-resistant parental control.
+Each rule has its own pause control. An authorized settings user can resume immediately or pause for 15 minutes, 30 minutes, one hour, two hours, or until the next local midnight.
+
+### Administrator PIN
+
+Personal mode can protect every in-app setting with a local administrator PIN. After setup, leaving Brainrot Shield immediately hides the configuration; reopening it exposes only an unlock prompt. Changing or removing the PIN requires the current PIN, and **Bloquear configuración ahora** closes the panel without waiting for the app to leave the foreground.
+
+The PIN is a deliberate in-app access boundary, not Android uninstall protection. Someone who controls the device can still clear Brainrot Shield's app data, revoke Accessibility or Usage Access, or uninstall the app. Repeated wrong PIN attempts produce progressively longer local retry delays, but clearing app data removes the PIN together with every other local setting.
 
 ## Build locally
 
@@ -82,12 +90,13 @@ If Gradle reports a PKIX certificate-chain error on Windows, run the build with 
 ## Configure the phone
 
 1. Install and open Brainrot Shield.
-2. Under **Apps protegidas**, choose YouTube, Instagram, and/or TikTok.
-3. Tap **Configurar accesibilidad**, read the disclosure, accept it, and enable Brainrot Shield in Android Accessibility settings.
-4. Enable or disable **Bloquear videos cortos**.
-5. To use the combined daily limit, enable it, accept the separate Usage Access disclosure, and grant access in Android settings.
-6. Configure the daily allowance and any focus windows.
-7. Check **Protección actual** before opening a selected app.
+2. Optionally create a **PIN de administrador**. Record it securely; there is no local recovery flow.
+3. Under **Apps protegidas**, choose YouTube, Instagram, and/or TikTok.
+4. Tap **Configurar accesibilidad**, read the disclosure, accept it, and enable Brainrot Shield in Android Accessibility settings.
+5. Enable or disable **Bloquear videos cortos**.
+6. To use the combined daily limit, enable it, accept the separate Usage Access disclosure, and grant access in Android settings.
+7. Configure the daily allowance and any focus windows.
+8. Check **Protección actual**, then tap **Bloquear configuración ahora** before handing the device back to the protected user.
 
 On some Samsung and Android versions, a sideloaded app can show a disabled accessibility switch. Open the Android app-info screen for Brainrot Shield, use the overflow menu, allow restricted settings, and try again.
 
@@ -99,7 +108,7 @@ Brainrot Shield follows the Android system theme. The light and dark palettes de
 
 ## YouTube playback-controls regression
 
-Version 1.2.0 removes click events from the accessibility-service subscription, stops requesting unnecessary interactive-window and not-important-view flags, and deletes the previous weak rule that combined an unselected Shorts navigation label with three ordinary video actions. A unit regression test now verifies that showing Like, Comments, Share, pause, skip, or timeline controls on a long-form YouTube video does not classify that screen as Shorts.
+Version 1.2.0 and later remove click events from the accessibility-service subscription, stop requesting unnecessary interactive-window and not-important-view flags, and delete the previous weak rule that combined an unselected Shorts navigation label with three ordinary video actions. A unit regression test verifies that showing Like, Comments, Share, pause, skip, or timeline controls on a long-form YouTube video does not classify that screen as Shorts.
 
 If YouTube still keeps its controls visible after this change, test the same video once with Brainrot Shield disabled in Accessibility settings. If the behavior occurs only while the service is enabled, it may be YouTube adapting its player to the presence of any accessibility service rather than Brainrot Shield performing a touch or holding the screen; this app never sends touch gestures or long-press actions.
 
@@ -116,7 +125,8 @@ The added Usage Access and broader Accessibility scope require updated prominent
 - YouTube, Instagram, and TikTok can change labels and view identifiers without notice.
 - App language, A/B tests, regional builds, accessibility metadata, and device-vendor changes can affect detection.
 - An ordinary Android app cannot password-protect its own system uninstall. This Personal build does not intercept uninstall or security interfaces.
-- Settings and pauses are locally changeable. A future guardian mode requires networking, identity, recovery, abuse prevention, and a new privacy/security review.
+- Settings and pauses can be protected by the local administrator PIN, but clearing app data removes that access boundary and resets the configuration.
+- A future remote guardian mode requires networking, identity, recovery, abuse prevention, and a new privacy/security review.
 - Strong uninstall restrictions are only legitimate in a separately enrolled Android Device Owner or Profile Owner mode.
 
 ## Privacy, security, and contributions

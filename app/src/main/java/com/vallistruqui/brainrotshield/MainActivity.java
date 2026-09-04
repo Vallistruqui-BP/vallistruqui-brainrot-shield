@@ -12,12 +12,16 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowInsets;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.Switch;
@@ -45,8 +49,11 @@ public final class MainActivity extends Activity {
 
     private ShieldPreferences preferences;
     private UsageStatsTracker usageStatsTracker;
+    private SettingsAccessManager settingsAccessManager;
+    private View pageRoot;
     private TextView accessibilityStatus;
     private TextView usageAccessStatus;
+    private TextView settingsAccessStatus;
     private TextView installedAppsStatus;
     private TextView dailyLimitValue;
     private TextView activeRulesSummary;
@@ -61,6 +68,11 @@ public final class MainActivity extends Activity {
     private Button pauseShortsButton;
     private Button pauseLimitButton;
     private Button pauseScheduleButton;
+    private Button configurePinButton;
+    private Button lockNowButton;
+    private Button removePinButton;
+    private AlertDialog unlockDialog;
+    private boolean settingsUnlocked;
     private boolean rendering;
 
     @Override
@@ -70,9 +82,12 @@ public final class MainActivity extends Activity {
 
         preferences = new ShieldPreferences(this);
         usageStatsTracker = new UsageStatsTracker(this);
+        settingsAccessManager = new SettingsAccessManager(this);
+        pageRoot = findViewById(R.id.page_root);
 
         accessibilityStatus = findViewById(R.id.accessibility_status);
         usageAccessStatus = findViewById(R.id.usage_access_status);
+        settingsAccessStatus = findViewById(R.id.settings_access_status);
         installedAppsStatus = findViewById(R.id.installed_apps_status);
         dailyLimitValue = findViewById(R.id.daily_limit_value);
         activeRulesSummary = findViewById(R.id.active_rules_summary);
@@ -84,6 +99,9 @@ public final class MainActivity extends Activity {
         dailyLimitSwitch = findViewById(R.id.daily_limit_switch);
         scheduleSwitch = findViewById(R.id.schedule_switch);
         addTimeWindowButton = findViewById(R.id.add_time_window_button);
+        configurePinButton = findViewById(R.id.configure_pin_button);
+        lockNowButton = findViewById(R.id.lock_now_button);
+        removePinButton = findViewById(R.id.remove_pin_button);
 
         findViewById(R.id.accessibility_settings_button).setOnClickListener(
                 ignored -> showAccessibilityDisclosure());
@@ -103,9 +121,24 @@ public final class MainActivity extends Activity {
                 ignored -> showPauseDialog(RestrictionType.DAILY_LIMIT));
         pauseScheduleButton.setOnClickListener(
                 ignored -> showPauseDialog(RestrictionType.FOCUS_SCHEDULE));
+        configurePinButton.setOnClickListener(ignored -> {
+            if (settingsAccessManager.hasPin()) {
+                showCurrentPinVerification(
+                        R.string.verify_pin_to_change,
+                        () -> showPinSetupDialog(true));
+            } else {
+                showPinSetupDialog(false);
+            }
+        });
+        lockNowButton.setOnClickListener(ignored -> lockSettingsNow());
+        removePinButton.setOnClickListener(ignored -> showCurrentPinVerification(
+                R.string.verify_pin_to_remove,
+                this::confirmRemovePin));
 
         bindSwitches();
-        applySystemBarInsets(findViewById(R.id.page_root));
+        settingsUnlocked = !settingsAccessManager.hasPin();
+        setSettingsContentVisible(settingsUnlocked);
+        applySystemBarInsets(pageRoot);
     }
 
     @Override
@@ -113,6 +146,16 @@ public final class MainActivity extends Activity {
         super.onStart();
         mainHandler.removeCallbacks(refreshRunnable);
         mainHandler.post(refreshRunnable);
+    }
+
+    @Override
+    protected void onPause() {
+        if (settingsAccessManager != null && settingsAccessManager.hasPin()) {
+            settingsUnlocked = false;
+            setSettingsContentVisible(false);
+            dismissUnlockDialog();
+        }
+        super.onPause();
     }
 
     @Override
@@ -124,6 +167,12 @@ public final class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (settingsAccessManager.hasPin() && !settingsUnlocked) {
+            setSettingsContentVisible(false);
+            showUnlockDialog();
+        } else {
+            setSettingsContentVisible(true);
+        }
         refreshStatus();
     }
 
@@ -188,6 +237,14 @@ public final class MainActivity extends Activity {
                 R.string.status_active, R.string.status_inactive);
         setStatus(usageAccessStatus, usageAccess,
                 R.string.status_granted, R.string.status_required);
+        boolean pinEnabled = settingsAccessManager.hasPin();
+        setStatus(settingsAccessStatus, pinEnabled,
+                R.string.status_pin_protected, R.string.status_pin_unprotected);
+        configurePinButton.setText(pinEnabled
+                ? R.string.change_admin_pin
+                : R.string.create_admin_pin);
+        lockNowButton.setVisibility(pinEnabled ? View.VISIBLE : View.GONE);
+        removePinButton.setVisibility(pinEnabled ? View.VISIBLE : View.GONE);
 
         rendering = true;
         youtubeSwitch.setChecked(preferences.isAppEnabled(ProtectedApp.YOUTUBE));
@@ -208,6 +265,256 @@ public final class MainActivity extends Activity {
                 formatMinutes(preferences.getDailyLimitMinutes())));
         renderTimeWindows();
         activeRulesSummary.setText(buildActiveRulesSummary(System.currentTimeMillis(), usageAccess));
+    }
+
+    private void showUnlockDialog() {
+        if (!settingsAccessManager.hasPin()) {
+            settingsUnlocked = true;
+            setSettingsContentVisible(true);
+            return;
+        }
+        if (unlockDialog != null && unlockDialog.isShowing()) {
+            return;
+        }
+
+        LinearLayout form = createPinForm(R.string.unlock_settings_body);
+        EditText pin = addPinField(form, R.string.admin_pin_label);
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.unlock_settings_title)
+                .setView(form)
+                .setNegativeButton(R.string.exit_app, (ignored, which) -> finishAndRemoveTask())
+                .setPositiveButton(R.string.unlock, null)
+                .setCancelable(false)
+                .create();
+        unlockDialog = dialog;
+        dialog.setOnDismissListener(ignored -> {
+            if (unlockDialog == dialog) {
+                unlockDialog = null;
+            }
+        });
+        dialog.setOnShowListener(ignored -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(button -> {
+                SettingsAccessManager.VerificationResult result = settingsAccessManager.verify(
+                        pin.getText().toString(), System.currentTimeMillis());
+                if (result.status() == SettingsAccessManager.VerificationStatus.SUCCESS) {
+                    settingsUnlocked = true;
+                    setSettingsContentVisible(true);
+                    refreshStatus();
+                    pageRoot.announceForAccessibility(getString(R.string.settings_unlocked));
+                    dialog.dismiss();
+                    return;
+                }
+                showPinVerificationError(pin, result);
+            });
+            showExistingLockout(pin);
+            pin.requestFocus();
+        });
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setSoftInputMode(
+                    WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        }
+    }
+
+    private void showPinSetupDialog(boolean replacingExistingPin) {
+        LinearLayout form = createPinForm(R.string.create_pin_body);
+        EditText pin = addPinField(form, R.string.new_admin_pin_label);
+        EditText confirmation = addPinField(form, R.string.confirm_admin_pin_label);
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(replacingExistingPin
+                        ? R.string.change_admin_pin
+                        : R.string.create_admin_pin)
+                .setView(form)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.save, null)
+                .create();
+        dialog.setOnShowListener(ignored -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(button -> {
+                String pinValue = pin.getText().toString();
+                if (!SettingsAccessManager.isValidPin(pinValue)) {
+                    pin.setError(getString(R.string.pin_requirements_error));
+                    pin.requestFocus();
+                    return;
+                }
+                if (!pinValue.contentEquals(confirmation.getText())) {
+                    confirmation.setError(getString(R.string.pin_mismatch_error));
+                    confirmation.requestFocus();
+                    return;
+                }
+                if (!settingsAccessManager.setPin(pinValue)) {
+                    pin.setError(getString(R.string.pin_save_error));
+                    pin.requestFocus();
+                    return;
+                }
+                settingsUnlocked = true;
+                refreshStatus();
+                Toast.makeText(this, R.string.pin_saved, Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            });
+            pin.requestFocus();
+        });
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setSoftInputMode(
+                    WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        }
+    }
+
+    private void showCurrentPinVerification(int bodyText, Runnable onSuccess) {
+        LinearLayout form = createPinForm(bodyText);
+        EditText pin = addPinField(form, R.string.current_admin_pin_label);
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.verify_admin_pin_title)
+                .setView(form)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.continue_action, null)
+                .create();
+        dialog.setOnShowListener(ignored -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(button -> {
+                SettingsAccessManager.VerificationResult result = settingsAccessManager.verify(
+                        pin.getText().toString(), System.currentTimeMillis());
+                if (result.status() == SettingsAccessManager.VerificationStatus.SUCCESS) {
+                    dialog.dismiss();
+                    onSuccess.run();
+                    return;
+                }
+                showPinVerificationError(pin, result);
+            });
+            showExistingLockout(pin);
+            pin.requestFocus();
+        });
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setSoftInputMode(
+                    WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        }
+    }
+
+    private LinearLayout createPinForm(int bodyText) {
+        LinearLayout form = new LinearLayout(this);
+        form.setOrientation(LinearLayout.VERTICAL);
+        form.setPadding(dp(24), dp(8), dp(24), 0);
+
+        TextView body = new TextView(this);
+        body.setText(bodyText);
+        body.setTextColor(getColor(R.color.muted));
+        body.setTextSize(14f);
+        body.setLineSpacing(0f, 1.2f);
+        form.addView(body, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        return form;
+    }
+
+    private EditText addPinField(LinearLayout form, int labelText) {
+        TextView label = new TextView(this);
+        label.setText(labelText);
+        label.setTextColor(getColor(R.color.ink));
+        label.setTextSize(14f);
+        label.setTypeface(null, android.graphics.Typeface.BOLD);
+        LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        labelParams.topMargin = dp(16);
+        form.addView(label, labelParams);
+
+        EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER
+                | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+        input.setSingleLine(true);
+        input.setMinHeight(dp(52));
+        input.setTextColor(getColor(R.color.ink));
+        input.setHintTextColor(getColor(R.color.muted));
+        input.setHint(R.string.pin_hint);
+        input.setFilters(new InputFilter[]{new InputFilter.LengthFilter(12)});
+        input.setContentDescription(getString(labelText));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            input.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);
+        }
+        form.addView(input, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        return input;
+    }
+
+    private void showExistingLockout(EditText pin) {
+        long remaining = settingsAccessManager.getRemainingLockoutMillis(
+                System.currentTimeMillis());
+        if (remaining > 0L) {
+            pin.setError(formatPinLockout(remaining));
+        }
+    }
+
+    private void showPinVerificationError(EditText pin,
+            SettingsAccessManager.VerificationResult result) {
+        pin.setText("");
+        switch (result.status()) {
+            case INVALID:
+                pin.setError(getString(R.string.pin_incorrect_error));
+                break;
+            case LOCKED:
+                pin.setError(formatPinLockout(result.retryAfterMillis()));
+                break;
+            default:
+                pin.setError(getString(R.string.pin_verification_error));
+                break;
+        }
+        pin.requestFocus();
+    }
+
+    private void confirmRemovePin() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.remove_admin_pin_title)
+                .setMessage(R.string.remove_admin_pin_body)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.remove, (dialog, which) -> {
+                    if (settingsAccessManager.clearPin()) {
+                        settingsUnlocked = true;
+                        setSettingsContentVisible(true);
+                        refreshStatus();
+                        Toast.makeText(this, R.string.pin_removed, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, R.string.pin_remove_error, Toast.LENGTH_LONG).show();
+                    }
+                })
+                .show();
+    }
+
+    private void lockSettingsNow() {
+        if (!settingsAccessManager.hasPin()) {
+            return;
+        }
+        settingsUnlocked = false;
+        setSettingsContentVisible(false);
+        showUnlockDialog();
+    }
+
+    private void setSettingsContentVisible(boolean visible) {
+        if (pageRoot == null) {
+            return;
+        }
+        pageRoot.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+        pageRoot.setImportantForAccessibility(visible
+                ? View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+                : View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+    }
+
+    private void dismissUnlockDialog() {
+        if (unlockDialog != null) {
+            AlertDialog dialog = unlockDialog;
+            unlockDialog = null;
+            dialog.dismiss();
+        }
+    }
+
+    private static long secondsRoundedUp(long millis) {
+        return Math.max(1L, (millis + 999L) / 1_000L);
+    }
+
+    private String formatPinLockout(long millis) {
+        int seconds = (int) secondsRoundedUp(millis);
+        return getResources().getQuantityString(
+                R.plurals.pin_locked_error, seconds, seconds);
     }
 
     private CharSequence buildInstalledAppsText() {

@@ -21,3 +21,5 @@ Remove or redact usernames, videos, notifications, accessibility-node text, devi
 ## Security boundaries
 
 The current app has no networking or account system. Its accessibility service must remain scoped to the explicitly supported YouTube, Instagram, and TikTok packages and must not be repurposed to capture content, credentials, or user input. Usage Access may be used only for local foreground detection and aggregate time-limit calculations; it must not create a detailed history of unrelated apps. A contribution that adds networking, new persisted data, remote control, broader package access, or Android device-management privileges requires explicit design and privacy review before it can be merged.
+
+The optional administrator PIN protects only the app's own settings interface. It is stored as a salted PBKDF2-derived hash, compared in constant time, and guarded by progressive retry delays. It must never be described as protection against app-data clearing, permission revocation, system settings, or uninstall. Reports involving PIN bypass, lockout bypass, credential exposure, or unauthorized configuration changes should use private security reporting.
