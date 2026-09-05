@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="canvas">#F3F1EA</color>
+    <color name="canvas">#F4F7F5</color>
+    <color name="navigation_bar">#285F52</color>
     <color name="surface">#FFFFFF</color>
-    <color name="ink">#10242E</color>
-    <color name="muted">#56666D</color>
-    <color name="header">#0C2733</color>
-    <color name="header_muted">#C7D5DA</color>
-    <color name="accent">#FFB000</color>
-    <color name="accent_soft">#FFF3D2</color>
-    <color name="on_accent">#10242E</color>
-    <color name="secondary_button">#173E4D</color>
-    <color name="tertiary_button">#E6ECEB</color>
-    <color name="line">#D9DED9</color>
-    <color name="status_ok_background">#DDF3E6</color>
-    <color name="status_ok_text">#12643B</color>
-    <color name="status_warning_background">#FFF0C7</color>
-    <color name="status_warning_text">#805600</color>
-    <color name="danger_button">#F9DEDC</color>
-    <color name="danger_text">#8C1D18</color>
+    <color name="surface_elevated">#FFFFFF</color>
+    <color name="ink">#17231F</color>
+    <color name="muted">#53635D</color>
+    <color name="primary">#285F52</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="primary_soft">#E9F3F0</color>
+    <color name="primary_outline">#BED9D1</color>
+    <color name="press_overlay">#1F000000</color>
+    <color name="secondary_button">#E4F0EC</color>
+    <color name="tertiary_button">#EDF2F0</color>
+    <color name="line">#DCE5E1</color>
+    <color name="status_ok_background">#E3F3ED</color>
+    <color name="status_ok_text">#1C604E</color>
+    <color name="status_warning_background">#FAF0DA</color>
+    <color name="status_warning_text">#74520D</color>
+    <color name="danger_button">#F8E4E2</color>
+    <color name="danger_text">#8F302C</color>
 </resources>

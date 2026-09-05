@@ -1,11 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Brainrot Shield</string>
-    <string name="hero_eyebrow">CONTROL DE ATENCIÓN</string>
-    <string name="hero_title">Tu tiempo, tus reglas.</string>
-    <string name="hero_body">Bloqueá videos cortos, fijá un límite diario y reservá ventanas de enfoque en YouTube, Instagram y TikTok.</string>
+    <string name="hero_eyebrow">BRAINROT SHIELD · BIENESTAR DIGITAL</string>
+    <string name="hero_title">Menos ruido. Más tiempo para vos.</string>
+    <string name="hero_body">Elegí límites tranquilos para YouTube, Instagram y TikTok. Todo funciona en tu dispositivo y bajo tus reglas.</string>
 
-    <string name="current_state_title">Protección actual</string>
+    <string name="protection_status_checking">Revisando</string>
+    <string name="protection_status_active">Protección activa</string>
+    <string name="protection_status_action">Acción necesaria</string>
+    <string name="protection_state_announcement">%1$s. %2$s</string>
+    <string name="protection_checking_title">Revisando tu protección</string>
+    <string name="protection_checking_detail">Enseguida vas a ver si todo está listo.</string>
+    <string name="protection_active_title">Tu atención está protegida</string>
+    <string name="protection_active_detail">Las reglas seleccionadas están listas y se aplican de manera local.</string>
+    <string name="protection_no_apps_title">Elegí qué apps querés proteger</string>
+    <string name="protection_no_apps_detail">Activá al menos una app en “Apps protegidas” para empezar.</string>
+    <string name="protection_no_rules_title">Elegí una restricción</string>
+    <string name="protection_no_rules_detail">Podés bloquear videos cortos, fijar un límite diario o definir ventanas de enfoque.</string>
+    <string name="protection_accessibility_title">Falta activar Accesibilidad</string>
+    <string name="protection_accessibility_detail">Este permiso permite reconocer las apps protegidas y aplicar las reglas que elegiste.</string>
+    <string name="protection_usage_title">Falta el acceso de uso</string>
+    <string name="protection_usage_detail">Concedelo para que el límite diario pueda medir el tiempo de las apps seleccionadas.</string>
+
     <string name="current_state_body">Este resumen muestra qué reglas se aplicarían ahora mismo.</string>
     <string name="summary_apps">Apps: %1$s</string>
     <string name="summary_shorts">Videos cortos: %1$s</string>
@@ -61,8 +77,8 @@
     <string name="unlock">Desbloquear</string>
     <string name="continue_action">Continuar</string>
 
-    <string name="permissions_title">Permisos necesarios</string>
-    <string name="permissions_body">Cada acceso se explica antes de abrir Ajustes. Podés usar el bloqueo de videos cortos sin activar el límite diario.</string>
+    <string name="permissions_title">Prepará tu dispositivo</string>
+    <string name="permissions_body">Te pedimos solamente los accesos necesarios y explicamos cada uno antes de abrir Ajustes. Podés bloquear videos cortos sin activar el límite diario.</string>
     <string name="accessibility_title">Servicio de accesibilidad</string>
     <string name="accessibility_body">Detecta feeds de videos cortos en las apps seleccionadas y ejecuta Atrás o Inicio cuando una regla bloquea contenido.</string>
     <string name="usage_access_title">Acceso a datos de uso</string>
@@ -75,7 +91,7 @@
     <string name="status_required">Necesario</string>
 
     <string name="apps_title">Apps protegidas</string>
-    <string name="apps_body">Las reglas activas se aplican solamente a las apps seleccionadas. TikTok se detecta por su paquete oficial de Google Play.</string>
+    <string name="apps_body">Elegí dónde querés recuperar tiempo. Las reglas se aplican solamente a estas apps; TikTok se reconoce por su paquete oficial de Google Play.</string>
     <string name="youtube_app">YouTube</string>
     <string name="instagram_app">Instagram</string>
     <string name="tiktok_app">TikTok</string>
@@ -93,7 +109,7 @@
     <string name="open_youtube">Abrir YouTube</string>
 
     <string name="restrictions_title">Restricciones</string>
-    <string name="restrictions_body">Cada regla se activa y se pausa por separado. Las pausas terminan automáticamente.</string>
+    <string name="restrictions_body">Combiná solamente las reglas que te sirvan. Cada una funciona y se pausa por separado.</string>
     <string name="shorts_rule_title">Bloquear videos cortos</string>
     <string name="shorts_rule_body">Sale de Shorts, Reels y feeds verticales de TikTok sin bloquear las secciones normales de YouTube o Instagram.</string>
     <string name="daily_limit_rule_title">Límite diario combinado</string>
@@ -121,7 +137,7 @@
     <string name="remove_time_window_body">¿Querés quitar la ventana %1$s?</string>
 
     <string name="temporary_pauses_title">Pausas temporales</string>
-    <string name="temporary_pauses_body">Levantá una sola regla sin modificar las demás. “Reanudar ahora” cancela una pausa vigente.</string>
+    <string name="temporary_pauses_body">Tomá una excepción consciente sin desarmar tu configuración. Las pausas terminan automáticamente.</string>
     <string name="pause_shorts">Pausar o reanudar videos cortos</string>
     <string name="pause_limit">Pausar o reanudar límite diario</string>
     <string name="pause_schedule">Pausar o reanudar horarios</string>
@@ -136,6 +152,9 @@
         <item>Pausar 2 horas</item>
         <item>Pausar hasta mañana</item>
     </string-array>
+
+    <string name="support_title">Ayuda y compatibilidad</string>
+    <string name="support_body">Soluciones breves para comportamientos que dependen de otras aplicaciones.</string>
 
     <string name="privacy_title">Privacidad por diseño</string>
     <string name="privacy_body">Sin internet, cuentas, anuncios ni capturas. La configuración queda en el dispositivo. Accesibilidad procesa la interfaz visible solo en YouTube, Instagram y TikTok; Datos de uso calcula localmente su tiempo en primer plano.</string>

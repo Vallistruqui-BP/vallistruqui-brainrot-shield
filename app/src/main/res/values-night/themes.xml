@@ -3,10 +3,10 @@
     <style name="Theme.ShortsShield" parent="android:style/Theme.Material.NoActionBar">
         <item name="android:fontFamily">sans</item>
         <item name="android:windowActionModeOverlay">true</item>
-        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:colorAccent">@color/primary</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:statusBarColor">@color/header</item>
-        <item name="android:navigationBarColor">@color/header</item>
+        <item name="android:statusBarColor">@color/canvas</item>
+        <item name="android:navigationBarColor">@color/navigation_bar</item>
         <item name="android:windowBackground">@color/canvas</item>
         <item name="android:windowNoTitle">true</item>
     </style>

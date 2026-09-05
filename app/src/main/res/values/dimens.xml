@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="page_horizontal_margin">16dp</dimen>
+    <dimen name="content_horizontal_padding">20dp</dimen>
+    <dimen name="admin_actions_enter_offset">4dp</dimen>
+</resources>

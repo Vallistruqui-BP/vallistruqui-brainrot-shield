@@ -11,7 +11,7 @@ The current app works entirely on the device and supports the official Android p
 - Instagram (`com.instagram.android`)
 - TikTok (`com.zhiliaoapp.musically`)
 
-> **Project status:** experimental open-source release. The Android implementation and automated tests are complete for version 1.3.1, but the Instagram and TikTok heuristics, settings-access flow, and YouTube compatibility guidance still need validation on representative real devices before production compatibility is claimed. The app has not yet been published on Google Play.
+> **Project status:** experimental open-source release. The Android implementation and automated tests are complete for version 1.4.0, but the Instagram and TikTok heuristics, settings-access flow, and YouTube compatibility guidance still need validation on representative real devices before production compatibility is claimed. The app has not yet been published on Google Play.
 
 ## What is included
 
@@ -25,6 +25,7 @@ The current app works entirely on the device and supports the official Android p
 - A large full-screen explanation before the app exits because of a daily limit or focus window.
 - A shorter full-screen explanation when a short-form feed is detected.
 - Automatic system light/dark theme support with semantic color resources.
+- A Calm Premium interface with a clear protection state, quiet layered surfaces, adaptive tablet spacing, and restrained state transitions.
 - An optional 6-to-12-digit administrator PIN that hides and locks the entire settings panel whenever the app is left.
 - Salted PBKDF2 PIN verification, constant-time hash comparison, and progressive retry delays after repeated failures. The PIN itself is never stored.
 - An in-app YouTube compatibility guide for disabling YouTube's automatically selected Accessibility Player or giving its playback controls a finite hide timeout.
@@ -106,7 +107,7 @@ Because the application ID changed from the earliest local prototype, installing
 
 ## Dark mode
 
-Brainrot Shield follows the Android system theme. The light and dark palettes define independent canvas, surface, text, divider, status, accent, and interaction colors rather than relying on automatic color inversion. Full visual verification still requires a physical device or emulator in both modes.
+Brainrot Shield follows the Android system theme. The light and dark palettes define independent canvas, surface, text, divider, status, accent, and interaction colors rather than relying on automatic color inversion. Version 1.4.0 was visually checked on an Android 16 emulator in both modes and with enlarged system text; representative physical-device testing remains required before production compatibility is claimed.
 
 ## YouTube playback controls
 

@@ -1,5 +1,7 @@
 package com.vallistruqui.brainrotshield;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.TimePickerDialog;
@@ -20,6 +22,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.animation.PathInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -37,6 +40,11 @@ import java.util.Locale;
 
 public final class MainActivity extends Activity {
     private static final long STATUS_REFRESH_MS = 30_000L;
+    private static final long PROTECTION_STATE_TRANSITION_MS = 180L;
+    private static final long ADMIN_ACTIONS_ENTER_MS = 160L;
+    private static final long ADMIN_ACTIONS_EXIT_MS = 120L;
+    private static final PathInterpolator CALM_EASE_OUT =
+            new PathInterpolator(0.23f, 1f, 0.32f, 1f);
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final Runnable refreshRunnable = new Runnable() {
@@ -51,6 +59,10 @@ public final class MainActivity extends Activity {
     private UsageStatsTracker usageStatsTracker;
     private SettingsAccessManager settingsAccessManager;
     private View pageRoot;
+    private View protectionSummaryCard;
+    private TextView protectionStatusChip;
+    private TextView protectionStateTitle;
+    private TextView protectionStateDetail;
     private TextView accessibilityStatus;
     private TextView usageAccessStatus;
     private TextView settingsAccessStatus;
@@ -58,6 +70,7 @@ public final class MainActivity extends Activity {
     private TextView dailyLimitValue;
     private TextView activeRulesSummary;
     private LinearLayout timeWindowsContainer;
+    private LinearLayout adminProtectedActions;
     private Switch youtubeSwitch;
     private Switch instagramSwitch;
     private Switch tiktokSwitch;
@@ -65,6 +78,8 @@ public final class MainActivity extends Activity {
     private Switch dailyLimitSwitch;
     private Switch scheduleSwitch;
     private Button addTimeWindowButton;
+    private Button accessibilitySettingsButton;
+    private Button usageAccessButton;
     private Button pauseShortsButton;
     private Button pauseLimitButton;
     private Button pauseScheduleButton;
@@ -74,6 +89,9 @@ public final class MainActivity extends Activity {
     private AlertDialog unlockDialog;
     private boolean settingsUnlocked;
     private boolean rendering;
+    private boolean protectionTransitionRunning;
+    private ProtectionPresentation.State renderedProtectionState;
+    private Boolean renderedPinEnabled;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +103,10 @@ public final class MainActivity extends Activity {
         settingsAccessManager = new SettingsAccessManager(this);
         pageRoot = findViewById(R.id.page_root);
 
+        protectionSummaryCard = findViewById(R.id.protection_summary_card);
+        protectionStatusChip = findViewById(R.id.protection_status_chip);
+        protectionStateTitle = findViewById(R.id.protection_state_title);
+        protectionStateDetail = findViewById(R.id.protection_state_detail);
         accessibilityStatus = findViewById(R.id.accessibility_status);
         usageAccessStatus = findViewById(R.id.usage_access_status);
         settingsAccessStatus = findViewById(R.id.settings_access_status);
@@ -92,6 +114,7 @@ public final class MainActivity extends Activity {
         dailyLimitValue = findViewById(R.id.daily_limit_value);
         activeRulesSummary = findViewById(R.id.active_rules_summary);
         timeWindowsContainer = findViewById(R.id.time_windows_container);
+        adminProtectedActions = findViewById(R.id.admin_protected_actions);
         youtubeSwitch = findViewById(R.id.youtube_switch);
         instagramSwitch = findViewById(R.id.instagram_switch);
         tiktokSwitch = findViewById(R.id.tiktok_switch);
@@ -99,14 +122,14 @@ public final class MainActivity extends Activity {
         dailyLimitSwitch = findViewById(R.id.daily_limit_switch);
         scheduleSwitch = findViewById(R.id.schedule_switch);
         addTimeWindowButton = findViewById(R.id.add_time_window_button);
+        accessibilitySettingsButton = findViewById(R.id.accessibility_settings_button);
+        usageAccessButton = findViewById(R.id.usage_access_button);
         configurePinButton = findViewById(R.id.configure_pin_button);
         lockNowButton = findViewById(R.id.lock_now_button);
         removePinButton = findViewById(R.id.remove_pin_button);
 
-        findViewById(R.id.accessibility_settings_button).setOnClickListener(
-                ignored -> showAccessibilityDisclosure());
-        findViewById(R.id.usage_access_button).setOnClickListener(
-                ignored -> showUsageAccessDisclosure());
+        accessibilitySettingsButton.setOnClickListener(ignored -> showAccessibilityDisclosure());
+        usageAccessButton.setOnClickListener(ignored -> showUsageAccessDisclosure());
         findViewById(R.id.open_test_app_button).setOnClickListener(
                 ignored -> showAppLauncher());
         findViewById(R.id.youtube_controls_help_button).setOnClickListener(
@@ -246,8 +269,17 @@ public final class MainActivity extends Activity {
         configurePinButton.setText(pinEnabled
                 ? R.string.change_admin_pin
                 : R.string.create_admin_pin);
-        lockNowButton.setVisibility(pinEnabled ? View.VISIBLE : View.GONE);
-        removePinButton.setVisibility(pinEnabled ? View.VISIBLE : View.GONE);
+        renderAdminActions(pinEnabled);
+
+        ProtectionPresentation presentation = ProtectionPresentation.evaluate(
+                serviceEnabled,
+                usageAccess,
+                preferences.getEnabledApps().size(),
+                preferences.isShortFormEnabled(),
+                preferences.isDailyLimitEnabled(),
+                preferences.isFocusScheduleEnabled());
+        renderProtectionPresentation(presentation);
+        renderSetupActionPriority(presentation.primaryAction());
 
         rendering = true;
         youtubeSwitch.setChecked(preferences.isAppEnabled(ProtectedApp.YOUTUBE));
@@ -268,6 +300,140 @@ public final class MainActivity extends Activity {
                 formatMinutes(preferences.getDailyLimitMinutes())));
         renderTimeWindows();
         activeRulesSummary.setText(buildActiveRulesSummary(System.currentTimeMillis(), usageAccess));
+    }
+
+    private void renderProtectionPresentation(ProtectionPresentation presentation) {
+        int title;
+        int detail;
+        switch (presentation.state()) {
+            case PROTECTED:
+                title = R.string.protection_active_title;
+                detail = R.string.protection_active_detail;
+                break;
+            case NEEDS_ACCESSIBILITY:
+                title = R.string.protection_accessibility_title;
+                detail = R.string.protection_accessibility_detail;
+                break;
+            case NEEDS_USAGE_ACCESS:
+                title = R.string.protection_usage_title;
+                detail = R.string.protection_usage_detail;
+                break;
+            case NO_APPS:
+                title = R.string.protection_no_apps_title;
+                detail = R.string.protection_no_apps_detail;
+                break;
+            case NO_RULES:
+                title = R.string.protection_no_rules_title;
+                detail = R.string.protection_no_rules_detail;
+                break;
+            default:
+                throw new IllegalStateException(
+                        "Unsupported protection state " + presentation.state());
+        }
+
+        String titleText = getString(title);
+        String detailText = getString(detail);
+        protectionStateTitle.setText(titleText);
+        protectionStateDetail.setText(detailText);
+        setStatus(
+                protectionStatusChip,
+                presentation.isProtected(),
+                R.string.protection_status_active,
+                R.string.protection_status_action);
+
+        if (ProtectionPresentation.shouldAnnounce(
+                renderedProtectionState, presentation.state())) {
+            protectionSummaryCard.announceForAccessibility(getString(
+                    R.string.protection_state_announcement,
+                    titleText,
+                    detailText));
+            protectionSummaryCard.animate().setListener(null);
+            protectionSummaryCard.animate().cancel();
+            if (!protectionTransitionRunning) {
+                protectionSummaryCard.setAlpha(0.68f);
+            }
+            protectionTransitionRunning = true;
+            protectionSummaryCard.animate()
+                    .alpha(1f)
+                    .setDuration(PROTECTION_STATE_TRANSITION_MS)
+                    .setInterpolator(CALM_EASE_OUT)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            protectionTransitionRunning = false;
+                            protectionSummaryCard.setAlpha(1f);
+                            protectionSummaryCard.animate().setListener(null);
+                        }
+                    })
+                    .start();
+        }
+        renderedProtectionState = presentation.state();
+    }
+
+    private void renderSetupActionPriority(ProtectionPresentation.PrimaryAction primaryAction) {
+        setSetupActionPrimary(
+                accessibilitySettingsButton,
+                primaryAction == ProtectionPresentation.PrimaryAction.ACCESSIBILITY);
+        setSetupActionPrimary(
+                usageAccessButton,
+                primaryAction == ProtectionPresentation.PrimaryAction.USAGE_ACCESS);
+    }
+
+    private void setSetupActionPrimary(Button button, boolean primary) {
+        button.setBackgroundResource(primary
+                ? R.drawable.button_primary_background
+                : R.drawable.button_tertiary_background);
+        button.setTextColor(getColor(primary ? R.color.on_primary : R.color.ink));
+    }
+
+    private void renderAdminActions(boolean pinEnabled) {
+        if (renderedPinEnabled == null) {
+            adminProtectedActions.setAlpha(1f);
+            adminProtectedActions.setVisibility(pinEnabled ? View.VISIBLE : View.GONE);
+            renderedPinEnabled = pinEnabled;
+            return;
+        }
+        if (renderedPinEnabled == pinEnabled) {
+            return;
+        }
+
+        adminProtectedActions.animate().setListener(null);
+        adminProtectedActions.animate().cancel();
+        renderedPinEnabled = pinEnabled;
+
+        if (pinEnabled) {
+            boolean wasHidden = adminProtectedActions.getVisibility() != View.VISIBLE;
+            if (wasHidden) {
+                adminProtectedActions.setAlpha(0f);
+                adminProtectedActions.setTranslationY(
+                        getResources().getDimension(R.dimen.admin_actions_enter_offset));
+            }
+            adminProtectedActions.setVisibility(View.VISIBLE);
+            adminProtectedActions.animate()
+                    .alpha(1f)
+                    .translationY(0f)
+                    .setDuration(ADMIN_ACTIONS_ENTER_MS)
+                    .setInterpolator(CALM_EASE_OUT)
+                    .start();
+            return;
+        }
+
+        adminProtectedActions.animate()
+                .alpha(0f)
+                .setDuration(ADMIN_ACTIONS_EXIT_MS)
+                .setInterpolator(CALM_EASE_OUT)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        if (Boolean.FALSE.equals(renderedPinEnabled)) {
+                            adminProtectedActions.setVisibility(View.GONE);
+                            adminProtectedActions.setAlpha(1f);
+                            adminProtectedActions.setTranslationY(0f);
+                        }
+                        adminProtectedActions.animate().setListener(null);
+                    }
+                })
+                .start();
     }
 
     private void showUnlockDialog() {
